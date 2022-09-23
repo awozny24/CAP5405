@@ -16,11 +16,15 @@ from sklearn.model_selection import train_test_split, cross_val_score
 import os
 import numpy as np
 import classifiers
+from sys import platform
 
 path = os.getcwd()
 
 #list out data files
-single = np.loadtxt((path +'\\tictac_single.txt'))
+if platform == 'darwin':
+  single = np.loadtxt((path +'/tictac_single.txt'))
+else:
+  single = np.loadtxt((path +'\\tictac_single.txt'))
 
 
 def adjustRegressorValues(y_pred, ftype = None):
