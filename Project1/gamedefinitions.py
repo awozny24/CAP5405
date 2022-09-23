@@ -23,34 +23,7 @@ path = os.getcwd()
 single = np.loadtxt((path +'\\tictac_single.txt'))
 
 
-def adjustRegressorValues(y_pred, ftype = None):
-    '''
-    :param y_pred: predicted y values for X_test
-    :param ftype: file type that we are working upon - {'single','multi','final'}
-    :return: returns adjust regressor values
-    '''
-    if ftype == 'final':
-        y_pred[y_pred<0] = -1
-        y_pred[y_pred>=0] = 1
-    elif ftype == 'single':
-        y_pred[y_pred<=0] = 0
-        y_pred[y_pred>=8] = 8
-        #
-        y_pred = np.floor(y_pred+.5)
-    else:
-        y_val = np.zeros((y_pred.shape[0], 1))
-        for i,vals in enumerate(y_pred):
-            mx, idx = -10000000, -1
-            for j in range(len(vals)):
-                if mx<vals[j]:
-                    mx = vals[j]
-                    idx = j
-            y_val[i] = idx
-        y_pred = y_val
-    return y_pred
 
-''' end here
-'''
 
 #resource 
 #https://www.kaggle.com/code/ikarus777/tic-tac-toe/notebook
@@ -170,10 +143,17 @@ class gameLayout:
 
   def predict_move(self, classifier, board):
       prediction = None
-      #shouldn't need to call get empty
-      #empty = self.getEmpty()
+      
+      empty = self.getEmpty()
+      #for some reason this is making invalid predictions
+      
       val = classifier.predict(board)
       prediction = [int(val//3), int(val%3)]
+      #forced to use a random valid move if prediction is not valid
+      if (not prediction in empty):
+          return random.choice(empty) 
+     
+  
       return prediction
   
     
