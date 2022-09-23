@@ -193,7 +193,7 @@ class gameLayout:
           
           #note only use predicted moves from classifier if it
           #is the computers turn otherwise use random move
-          if (mark == '0'):
+          if (mark == 'O'):
               #prepare gameboard for classification
               test_board = self.board.copy()
               #replace characters for test_board using lambda
@@ -223,26 +223,35 @@ class gameLayout:
                
         
         if (win):
-          print("Winner!")
+          print(f"Winner! is {mark}")
           self.print_board()
      
         pass
    
 
-'''
-  def placeMark(board_state, empty_cells, mark):
-    return random.choice(empty_cells)
- '''
 
 layout = gameLayout()
 layout.print_board()
 
-#randVal = layout.randMove()
+
 randchoices = layout.getEmpty()
 
+'''
+no learning involved just random choices
+player wins by blind luck
+'''
 layout.gameplay()
 
+''' 
+uses classifiers
+trained on single dataset
+to predict the best move for 
+player O
+player X still makes 
+random moves
 
+more often than not player O should win
+'''
 svm = classifiers.svm('single')
 print("playing game trained on single classifier")
 layout.reset_board()
