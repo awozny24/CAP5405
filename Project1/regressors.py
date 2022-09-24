@@ -185,10 +185,8 @@ def GetRegressorPredictions(pred, thresh=None):
 # TODO: ADD TO THIS FUNCTIONS for Linear Regression
 # TODO: CHECK THIS FUNCTION AND ABOVE FUNCTION
 # TODO: How to specifically calculate accuracy
-def PredictionAccuracy(pred, y, model=None):
-    if (model == None):
-        print("Please insert model to test for accuracy!!")
-    elif (model == 'LR') or (model=='lr') or (model=="Linear Regression") or (model=="linear regression"):
+def PredictionAccuracy(pred, y):
+    if pred.ndim == 1:
         # use pred to find whether the predicted index is a valid move
         row_indices = np.asarray([i for i in range(0, y.shape[0])])
         acc = y[[row_indices],[pred]] == np.ones(pred.shape[0])
@@ -238,8 +236,8 @@ if (runLR):
 
         # print accuracies
         print("Accuracy Linear Regression")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y=y_train, model="LR")*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y=y_test, model="LR")*100))
+        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y=y_train)*100))
+        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y=y_test)*100))
         print()
 
 
@@ -262,8 +260,8 @@ if runKNNR:
 
         # print results
         print("K-Nearest Neighbors Regressor Accuracy")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train, model="KNNR")*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test, model="KNNR")*100))
+        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train)*100))
+        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test)*100))
         print()
 
 
@@ -286,7 +284,7 @@ if runMLPR:
 
         # print results
         print("MultiLayer Perceptron Regressor Accuracy")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train, model="MLPR")*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test, model="MLPR")*100))
+        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train)*100))
+        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test)*100))
         print()
         
