@@ -9,23 +9,21 @@ Original file is located at
 
 #remember player X is +1 and player O is -1 empty squares are 0 when loading dataset!
 import numpy as np
-from sklearn import neighbors
+import matplotlib.pyplot as plt
+from sklearn import neighbors, datasets
 from sklearn.model_selection import train_test_split
+
 
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 
 
-from sklearn.metrics import confusion_matrix
+#from sklearn.metrics import confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
-from sys import platform
 
-if platform == 'darwin':
-    slash = '/'
-else: 
-    slash = '\\'
 
 
 path = os.getcwd() 
@@ -39,29 +37,43 @@ def load(path):
 
 def mlp(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
          
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, stratify=Y, random_state=40)
-    mlp = MLPClassifier(random_state=1, max_iter=300).fit(X_train, y_train)
+    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40)
+    mlp = MLPClassifier(activation='relu', solver ='adam', max_iter=300).fit(X_train, y_train)
+   
     
-    #prediction = mlp.predict(X_test)
+    print(" cross validation scores:")
+    crossvalid(mlp, X, Y)
+    
+   
+    get_cmatrix(mlp, X_test, y_test)
+    
+
     
     return mlp
          
 
 def knn(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
     
-    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, test_size=5, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
     neigh = KNeighborsClassifier(n_neighbors=3)
     neigh.fit(X_train, y_train)
+ 
     
-    #predictions = neigh.predict(X_test)
+    
+    print(" cross validation scores:")
+    crossvalid(neigh, X, Y)
+  
+    
+    get_cmatrix(neigh, X_test, y_test)
+    
     
     return neigh
     
@@ -71,49 +83,48 @@ def knn(type = None):
 #want to change this to just svm
 def svm(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
        
     # Splitting training and testing samples
-    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, test_size=5, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
 
     # Creating and fitting the model
     svm = SVC(kernel='linear', gamma= 'scale', random_state= 40)
     svm.fit(X_train, y_train)
+    crossvalid(svm, X, Y)
     
-    #accuracy = svm.score(X_test, y_test)
+
     
-    #predictions = svm.predict(X_test)
+ 
+    get_cmatrix(svm, X_test, y_test)
  
     return svm
 
 
-def tenfold_crossvalid(clf, X, Y):
-    scores = cross_val_score(clf, X, Y, cv=10)
+def crossvalid(clf, X, Y):
+   
+    scores = cross_val_score(clf, X, np.ravel(Y), cv =5)
     print("%0.2f accuracy with a standard deviation of %0.2f" % (scores.mean(), scores.std()))
     
 
     
+def get_cmatrix(classifier, X_test, y_test):
+    title = [("Normalized confusion matrix")]
+    disp = ConfusionMatrixDisplay.from_estimator(
+        classifier,
+        X_test,
+        y_test,
+        
+        cmap=plt.cm.Blues,
+        normalize= 'true',
+    )
+    disp.ax_.set_title(title)
 
-'''
-in your code you will have
-this somewhere along for confusion matrix
+    print(title)
+    print(disp.confusion_matrix)
+    plt.show()
 
-
-  C = confusion_matrix(y_test, y_pred)
-        C = C.astype(np.float) / C.astype(np.float).sum(axis=1)
-        print("Confusion Matrix: ")
-
-to read in data you will want to have something like this
-
-    """ Function for loading dataset from a text file and slicing in features and labels"""
-    content = np.loadtxt(file_name)
-    X = content[:,:9]
-    y = content[:,9:]
-    return X,y
-
-    why?
-
-        '''
-
+    
+svm('final')

@@ -16,15 +16,11 @@ from sklearn.model_selection import train_test_split, cross_val_score
 import os
 import numpy as np
 import classifiers
-from sys import platform
 
 path = os.getcwd()
 
 #list out data files
-if platform == 'darwin':
-  single = np.loadtxt((path +'/tictac_single.txt'))
-else:
-  single = np.loadtxt((path +'\\tictac_single.txt'))
+single = np.loadtxt((path +'\\tictac_single.txt'))
 
 
 
@@ -147,7 +143,7 @@ class gameLayout:
 
   def predict_move(self, classifier, board):
       prediction = None
-      
+      board = board.astype(int)
       empty = self.getEmpty()
       #for some reason this is making invalid predictions
       
@@ -236,17 +232,19 @@ random moves
 
 more often than not player O should win
 '''
-svm = classifiers.svm('single')
-print("playing game trained on single classifier")
+# svm = classifiers.svm('single')
+# print("playing game trained on single dataset using linear svm classifier")
+# layout.reset_board()
+# layout.gameplay_classification(classifier = svm)
+
+
+# mlp = classifiers.mlp('single')
+# print("playing game trained on single dataset using mlp classifier")
+# layout.reset_board()
+# layout.gameplay_classification(classifier = mlp)
+
+knn = classifiers.knn('single')
+print("playing game trained on single dataset using linear svm classifier")
 layout.reset_board()
-layout.gameplay_classification(classifier = svm)
-
-# X, Y = classifiers.load(single)
-
-# accuracy, svm = classifiers.svm_single(X, Y)
-# test_board = layout.board
-# #lambda function to clean up board
-# for index, row in enumerate(test_board):
-#   #test_board[index] = list(map(lambda x: x.replace('_', '0'), row))
-#   test_board[index] = list(map(lambda x: x.replace('_', '0'), test_board[index]))
+layout.gameplay_classification(classifier = knn)
 
