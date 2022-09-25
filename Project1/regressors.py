@@ -87,7 +87,7 @@ class LR:
         
 
     # make a prediction using the learned weights
-    def predict(self, X):
+    def predict(self, X, thresh=None, eliminateUsedSquares=True):
         # add bias vector to training X matrix if added 
         if self.bias:
             if (X.ndim == 1):
@@ -95,9 +95,31 @@ class LR:
             else:
                 testX = np.append(X, np.ones((X.shape[0], 1)), 1)
 
-        return testX.dot(self.w)
+        # determine and return the prediction
+        pred = testX.dot(self.w)
+        if eliminateUsedSquares:
+            pred = EliminateUsedSquares(pred, X)
+        pred = GetRegressorPredictions(pred, thresh)
+        return pred
 
 ######### End Linear Regression Model #########
+
+######### Begin Regressor Wrapper #########
+class Regressor:
+    def __init__(self, model):
+        self.model = model
+
+    
+    def predict(self, X, thresh=None):
+        # make prediction and return it
+        pred = self.model.predict(X)
+        pred = GetRegressorPredictions(pred, thresh)
+        return pred
+
+
+######### End Regressor Wrapper #########
+
+
 
 ######### Helper Functions ###########
 
@@ -171,6 +193,7 @@ def GetKFolds(data, k=5, random_state=None, shufflePostSplit=True):
 
 
 def GetRegressorPredictions(pred, thresh=None):
+
     if thresh is None:
         # find the index of the next move from the maximum index of the linear regression predictions
         pred = np.argmax(pred, axis=1)
@@ -180,6 +203,24 @@ def GetRegressorPredictions(pred, thresh=None):
         pred[pred[:, np.array(range(0, pred.shape[1]))] >= thresh] = 1
         pred[pred[:, np.array(range(0, pred.shape[1]))] < thresh] = 0
         return pred
+
+
+# set the probability to 0 if the position is already taken
+def EliminateUsedSquares(pred, X):
+
+    # find the location of the 0's and 1's (i.e. which spots are taken and which are not)
+    zerosLoc = np.where(X == 0)
+    onesLoc = np.where(X == 1)
+
+    # switch 1's and 0's using XOR 
+    arr = np.copy(X)
+    arr[zerosLoc] = 1
+    arr[onesLoc] = 0
+
+    # multiply matrix of 1's and 0's
+    # now the probabilities where the spots are taken are set to 0
+    pred = np.multiply(pred, arr)
+    return pred
 
 
 # TODO: ADD TO THIS FUNCTIONS for Linear Regression
@@ -229,10 +270,8 @@ if (runLR):
         # get predictions
         # 1 = valid move
         # 0 = invalid move
-        predTrain = lr.predict(X_train)
-        predTrain = GetRegressorPredictions(predTrain)
-        predTest  = lr.predict(X_test)
-        predTest = GetRegressorPredictions(predTest)
+        predTrain = lr.predict(X_train, thresh=None, eliminateUsedSquares=True)
+        predTest  = lr.predict(X_test, thresh=None, eliminateUsedSquares=True)
 
         # print accuracies
         print("Accuracy Linear Regression")
@@ -254,8 +293,10 @@ if runKNNR:
         # 1 = valid move
         # 0 = invalid move
         predTrain = knnReg.predict(X_train)
+        predTrain = EliminateUsedSquares(predTrain, X_train)
         predTrain = GetRegressorPredictions(predTrain, thresh=0.5)
         predTest = knnReg.predict(X_test)
+        predTest = EliminateUsedSquares(predTest, X_test)
         predTest = GetRegressorPredictions(predTest, thresh=0.5)
 
         # print results
@@ -278,8 +319,10 @@ if runMLPR:
         # 1 = valid move
         # 0 = invalid move
         predTrain = mlpReg.predict(X_train)
+        predTrain = EliminateUsedSquares(predTrain, X_train)
         predTrain = GetRegressorPredictions(predTrain, thresh=0.5)
         predTest = mlpReg.predict(X_test)
+        predTest= EliminateUsedSquares(predTest, X_test)
         predTest = GetRegressorPredictions(predTest, thresh=0.5)
 
         # print results
