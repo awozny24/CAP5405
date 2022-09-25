@@ -42,6 +42,8 @@ class LR:
         # add bias vector to training X matrix if specified and reflect in shape of weights vectors
         if bias:
             trainX = np.append(X, np.ones((X.shape[0], 1)), 1)
+        else:
+            trainX = np.copy(X)
 
         # for each "class" (each possible space on tic tac toe)
         for i in range(0, y.shape[1]):
@@ -94,6 +96,8 @@ class LR:
                 testX = np.append(X, 1)
             else:
                 testX = np.append(X, np.ones((X.shape[0], 1)), 1)
+        else:
+            testX = np.copy(X)
 
         # determine and return the prediction
         pred = testX.dot(self.w)
