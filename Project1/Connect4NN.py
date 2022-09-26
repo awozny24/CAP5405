@@ -57,9 +57,9 @@ val_X, test_X, val_y, test_y = train_test_split(dummy_X, dummy_y, test_size=0.5,
 # print(mlpClass.score(test_X, test_y))
 
 # convert y to one hot encoded
-train_y = to_categorical(train_y, num_classes=3)
-val_y = to_categorical(val_y, num_classes=3)
-test_y = to_categorical(test_y, num_classes=3)
+train_y_onehot = to_categorical(train_y, num_classes=3)
+val_y_onehot = to_categorical(val_y, num_classes=3)
+test_y_onehot = to_categorical(test_y, num_classes=3)
 
 
 # max number of epochs
@@ -90,16 +90,17 @@ if not os.path.exists("c4NN_model"):
     c4NN.summary()
 
     # train model
-    modelHistory = c4NN.fit(train_X, train_y, 
-                            validation_data=(val_X, val_y), 
+    modelHistory = c4NN.fit(train_X, train_y_onehot, 
+                            validation_data=(val_X, val_y_onehot), 
                             epochs=max_epochs, 
                             batch_size=batch_size, 
                             shuffle=True)
 
-    loss, acc = c4NN.evaluate(test_X, test_y, verbose=2)
+    loss, acc = c4NN.evaluate(test_X, test_y_onehot, verbose=2)
     print("Model Accuracy: {:5.2f}%".format(100 * acc))
     c4NN.save("c4NN_model")
 
 else:
   c4NN = keras.models.load_model("c4NN_model")
-  c4NN.evaluate(test_X, test_y, verbose=2)
+  c4NN.evaluate(test_X, test_y_onehot, verbose=2)
+  print(c4NN.predict(test_X[0].reshape(1, test_X.shape[1])))
