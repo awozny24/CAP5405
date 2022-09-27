@@ -20,7 +20,7 @@ import classifiers
 path = os.getcwd()
 
 #list out data files
-single = np.loadtxt((path +'\\tictac_single.txt'))
+single = np.loadtxt((path +'/tictac_single.txt'))
 
 
 
