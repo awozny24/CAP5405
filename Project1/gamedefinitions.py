@@ -20,7 +20,7 @@ import classifiers
 path = os.getcwd()
 
 #list out data files
-single = np.loadtxt((path +'/tictac_single.txt'))
+single = np.loadtxt((path +'\\tictac_single.txt'))
 
 
 
@@ -142,6 +142,7 @@ class gameLayout:
 
 
   def predict_move(self, classifier, board):
+      #goal is to make reasonable moves for player O
       prediction = None
       board = board.astype(int)
       empty = self.getEmpty()
@@ -156,8 +157,33 @@ class gameLayout:
   
       return prediction
   
+  def predict_move_final(self, classifier, board):
+      #unlike the single dataset where the prediction
+      #returns the optimal spot on the tic tac toe board
+      #you have to search for remaining legal spots and score them
+      empty = self.getEmpty()
+      board = board.astype(int)
+      duplicate = board.copy()
+      scores = []
+      for legal_moves in empty:
+          #drop a -1 player 'O' at one of these valid locations
+          #and predict the score, more positive is better
+          duplicate[legal_moves[0]][legal_moves[1]] = '-1'
+          score = classifier.predict(duplicate)
+          scores.append(score)
+          #equivalent to reset board
+          duplicate = board
+      #find maximum value of list
+      #the index of max val is the prediction
+      max_val = max(scores)
+      max_index = scores.index(max_val)
     
-  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True):
+    
+      pass
+
+  
+    #need to add logic that supports gameplay for final dataset
+  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True, file = 'single'):
     if startingMove:
         move = self.randMove()
         self.playMove(move, mark)
@@ -185,7 +211,13 @@ class gameLayout:
               test_board = np.array(test_board)
               test_board = test_board.flatten()
               test_board = test_board.reshape(1,-1)
-              move = self.predict_move(classifier,test_board)
+              #depending on what dataset is being used
+              #call predict_move for single dataset
+              #or call predict_move_final for final dataset
+              if (file == 'single'):
+                  move = self.predict_move(classifier,test_board)
+              elif (file == 'final'):
+                  move = self.predict_move_final(classifier,test_board)
     
               #use SVM regression
               #move = self.randMove()
@@ -243,8 +275,12 @@ more often than not player O should win
 # layout.reset_board()
 # layout.gameplay_classification(classifier = mlp)
 
-knn = classifiers.knn('single')
-print("playing game trained on single dataset using linear svm classifier")
-layout.reset_board()
-layout.gameplay_classification(classifier = knn)
+# knn = classifiers.knn('single')
+# print("playing game trained on single dataset using knn classifier")
+# layout.reset_board()
+# layout.gameplay_classification(classifier = knn)
 
+knn = classifiers.knn('final')
+print("playing game trained on final dataset using knn classifier")
+layout.reset_board()
+layout.gameplay_classification(classifier = knn, file ='final')

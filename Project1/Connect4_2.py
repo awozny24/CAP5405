@@ -8,6 +8,7 @@ Created on Mon Sep 26 09:36:28 2022
 import os
 import re
 import numpy as np
+import random
 
 #custom exception
 class game_over(Exception):
@@ -15,83 +16,10 @@ class game_over(Exception):
 
 COLUMNS = 7
 ROWS = 6
-FIRST = '1'
-SECOND = '2'
+FIRST = 1
+SECOND = 2
 
 
-def GetData(path = None):
-    # get Connect4 data as a list
-    path = os.getcwd()
-    data = []
-    with open(path + '//connectfour.data', mode = 'r') as infile:
-        data.append([line.strip().split(',') for line in infile.readlines()])
-
-    # get data as numpy array
-    data = np.asarray(data)
-    data = data[0]
-
-    data[np.where(data=='b')] = 0
-    data[np.where(data=='x')] = 1
-    data[np.where(data=='o')] = -1
-    data[np.where(data=='draw')] = 0
-    data[np.where(data=='win')] = 1
-    data[np.where(data=='loss')] = -1
-
-    data = data.astype(np.float)
-
-    return data[:, :-1], data[:, -1]
-
-
-def load():
-    path = os.getcwd()
-    file = path + '//connectfour.data'
-    #regexp 
-    outcomes = 'win|loss|draw'
-    
-    snapShots = np.zeros((6,7,1))
-    gameStates =np.zeros((1))
-    firstLine = True
-    index = 1
-    NumSamples = 5000
-    
-    with open(file, mode ='r') as f:
-        for line in f:
-            line = line.strip()
-            if index == NumSamples:
-                break
-            
-            match = re.search(outcomes,line)
-            try:
-               board, state = re.split(outcomes,line)
-            except ValueError:
-                   print(f"error occured on line {index}")
-        
-            #convert comma separated string to list
-            board = board.split(',')
-     
-            #remove empty values from board
-            board = [x for x in board if x]    
-            board = np.array(list(board)).reshape(7,6)
-        
-            #reorient
-            board = np.flipud(board.T)
-            #add axis
-            board = board[:,:,np.newaxis]
-            state = match.group()
-            state = np.array(state)
-       
-            if firstLine:
-                snapShots = board
-                gameStates = state
-            else:
-                snapShots = np.concatenate((snapShots, board), axis = 2)
-                gameStates = np.hstack((gameStates, state))
-        
-            firstLine = False
-           # print(f"this is line number {index} \n")
-            index += 1
-        # = np.array(list(board)).reshape(6,7)
-    return snapShots, gameStates
         
 
 
@@ -120,19 +48,30 @@ class Game():
             if(self.board[0][col] == 0):
                 return True
         return False
-        
-         
+    
     def insert(self, column, mark):
         c = self.board[:,column]
+        #search from bottom to top
+        i = -1
+        while c[i] != 0:
+            i -=1
+        c[i] = mark
+        
+         
+    def insert_human(self, column, mark):
+        
+        while(not self.valid_choice(column)):
+            print("please enter a valid choice")
+            column = input()
+            column = int(column)
         if self.valid_choice(column):
+            c = self.board[:,column]
             #search from bottom to top
             i = -1
             while c[i] != 0:
                 i -=1
             c[i] = mark
-            return True
-        else:
-            return False
+            
         
     def winning_move(self, mark):
         #Horizontal
@@ -187,9 +126,49 @@ class Game():
                     return True
                 
         return False
+    
+    def getLegal(self):
+        legal = []
+        if not self.available_space():
+            return False
+        else:
+            for c in range(len(self.board[1])):
+                print(c)
+                #numpy.where should return None if there is nothing
+                if np.where(np.array(self.board[:,c])== 0):
+                    blanks = np.where(np.array(self.board[:,c])== 0)
+                    valid = [np.max(blanks), c]
+                    legal.append(valid)
+                    #skip over if none object is found in np.where
+                else:
+                    pass
+        return legal
+    
+    def humanPlayer(self, mark, isActive = False):
+        val = input(f"player {mark}'s turn, enter column: \n")
+        g.insert_human(int(val),mark)
+        
+    def randPlayer(self, mark):
+        #get legal values and insert
+        options = self.getLegal()
+        #only need the column
+        row,col = random.choice(options)
+        self.insert(col, mark)
+        #don't have to worry about invalid input
+        pass
+        
+                    
+               
+                
+        
+                
+               
+                
+            
                                                               
 if __name__ == '__main__':
     g = Game()
+    valid = g.getLegal()
     mark = FIRST
     #GetData()
    ## load()
@@ -197,10 +176,10 @@ if __name__ == '__main__':
     
     while ( True):
         g.print_board()
-        val = input(f"player {mark}'s turn, enter column: \n")
-        g.insert(int(val),mark)
+        g.randPlayer( mark)
         #evaluate winning move 
         if (g.winning_move(mark)):
+            g.print_board()
             print(f"player {mark} has won the game!")
             break
         if mark == FIRST:

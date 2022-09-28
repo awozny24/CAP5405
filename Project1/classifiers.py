@@ -23,14 +23,10 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
-from sys import platform
+
+
 
 path = os.getcwd() 
-
-if platform == 'darwin':
-    slash = '/'
-else: 
-    slash = '\\'
 
 def load(path):
   text = np.loadtxt(path)
@@ -41,9 +37,9 @@ def load(path):
 
 def mlp(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
          
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40)
     mlp = MLPClassifier(activation='relu', solver ='adam', max_iter=300).fit(X_train, y_train)
@@ -62,9 +58,9 @@ def mlp(type = None):
 
 def knn(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
     
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
     neigh = KNeighborsClassifier(n_neighbors=3)
@@ -87,9 +83,9 @@ def knn(type = None):
 #want to change this to just svm
 def svm(type = None):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + '\\tictac_final.txt')
        
     # Splitting training and testing samples
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
@@ -130,5 +126,3 @@ def get_cmatrix(classifier, X_test, y_test):
     print(disp.confusion_matrix)
     plt.show()
 
-    
-svm('final')
