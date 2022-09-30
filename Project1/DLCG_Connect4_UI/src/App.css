@@ -24,13 +24,15 @@ h1 {
   width: 100px;
   background-color: #4289ff;
   padding: 10px;
-  margin: 2px;
+  margin: 1px;
+  border-radius: 3px;
 }
 .block .circle {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   background-color: white;
+  box-shadow: inset 2px 3px 4px #0003;
   transition: 0.3s;
 }
 .block .circlex {
@@ -38,6 +40,7 @@ h1 {
   height: 100%;
   border-radius: 50%;
   background-color: yellow;
+  box-shadow: inset 2px 3px 4px #0003;
   transition: 0.3s;
 }
 .block .circleo {
@@ -45,9 +48,66 @@ h1 {
   height: 100%;
   border-radius: 50%;
   background-color: red;
+  box-shadow: inset 2px 3px 4px #0003;
   transition: 0.3s;
 }
 .column {
   display: inline-block;
   cursor: pointer;
+}
+.modal {
+  position: absolute;
+  font-size: 20px;
+  padding: 30px;
+  right: -20%;
+  top: 20px;
+  background-color: #4289ff;
+  color: white;
+  text-align: start;
+  width: 150px;
+  box-shadow: 3px 4px 5px #0003;
+  border-radius: 5px;
+  animation: show-hide 2s ease-in;
+}
+@keyframes show-hide {
+  0% {
+    right: -40%;
+  }
+  10% {
+    right: 40px;
+  }
+  15% {
+    right: 20px;
+  }
+  75% {
+    right: 20px;
+  }
+  80% {
+    right: 25px;
+  }
+  100% {
+    right: -100%;
+  }
+}
+.modal .loader {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  width: 2%;
+  background-color: white;
+  animation-delay: 0.5s;
+  animation: loading 1.8s ease-in-out;
+}
+
+@keyframes loading {
+  0% {
+    width: 2%;
+  }
+  80% {
+    width: 100%;
+  }
+  100% {
+    width: 100%;
+  }
 }

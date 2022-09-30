@@ -4,44 +4,34 @@ import Block from "./block";
 class Column extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { filledblock: 0, filledblockplayers: [] };
+    this.state = { filledblock: 0 };
   }
 
   onClickHandler = () => {
-    if (this.state.filledblockplayers.length < 6) {
+    if (this.state.filledblock < 6) {
       this.setState({
         filledblock: this.state.filledblock + 1,
-        filledblockplayers:
-          this.state.filledblockplayers.length < 6
-            ? [...this.state.filledblockplayers, this.props.player]
-            : this.state.filledblockplayers,
       });
+
+      this.props.boardStateHandler(this.props.columnNo, this.state.filledblock);
       this.props.onBoardClickHandler();
     } else {
-      alert("Invalid Move");
+      this.props.alertfunc("Invalid Move");
     }
   };
 
   setblocks = () => {
     let blocks = [];
-    for (let i = 6; i > 0; i--) {
-      if (i <= this.state.filledblock) {
-        blocks.push(
-          <Block
-            key={i}
-            filled={true}
-            player={this.state.filledblockplayers[i - 1]}
-          ></Block>
-        );
+    for (let i in this.props.blockSequence) {
+      if (this.props.blockSequence[i] === 0) {
+        blocks.push(<Block key={i} filled={false} player="b" />);
+      } else if (this.props.blockSequence[i] === 1) {
+        blocks.push(<Block key={i} filled={true} player="x" />);
       } else {
-        blocks.push(<Block key={i} filled={false} player={"b"}></Block>);
+        blocks.push(<Block key={i} filled={true} player="o" />);
       }
     }
-    this.props.boardStateHandler(
-      this.state.filledblockplayers,
-      this.props.columnNo
-    );
-    return blocks;
+    return blocks.reverse();
   };
 
   render() {
