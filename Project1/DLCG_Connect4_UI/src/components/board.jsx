@@ -14,6 +14,7 @@ class Board extends React.Component {
       4: [0, 0, 0, 0, 0, 0],
       5: [0, 0, 0, 0, 0, 0],
       6: [0, 0, 0, 0, 0, 0],
+      gameState: "Draw"
     };
   }
 
@@ -39,31 +40,44 @@ class Board extends React.Component {
       }
     }
 
-    this.setState((prevState) => {
-      let newState = {};
-      for (let i in Object.keys(prevState)) {
-        if (Object.keys(prevState)[i] == columnNo) {
-          newState[columnNo] = colState;
-        } else {
-          newState[Object.keys(prevState)[i]] =
-            prevState[Object.keys(prevState)[i]];
+    this.setState(
+      (prevState) => {
+        let newState = {};
+        for (let i in Object.keys(prevState)) {
+          if (Object.keys(prevState)[i] == columnNo) {
+            newState[columnNo] = colState;
+          } else {
+            newState[Object.keys(prevState)[i]] =
+              prevState[Object.keys(prevState)[i]];
+          }
         }
+        return newState;
+      },
+      async () => {
+        let arr = [
+          ...this.state[0],
+          ...this.state[1],
+          ...this.state[2],
+          ...this.state[3],
+          ...this.state[4],
+          ...this.state[5],
+          ...this.state[6],
+        ];
+        let res = await this.props.predictfunc(arr);
+        this.setState((prevState) => {
+          let gameNewState = "";
+          console.log(res);
+          if(res == 0){
+            gameNewState = "X Wins";
+          }else if(res == 1){
+            gameNewState = "X Loses";
+          }else{
+            gameNewState = "Draw";
+          }
+         return {...prevState, gameState:gameNewState}; 
+        })
       }
-      return newState;
-    }, () => {
-      let arr = [
-        ...this.state[0],
-        ...this.state[1],
-        ...this.state[2],
-        ...this.state[3],
-        ...this.state[4],
-        ...this.state[5],
-        ...this.state[6],
-      ]
-      let res = this.props.predictfunc(arr);
-      console.log(res);
-    });
-    
+    );
   };
 
   render() {
@@ -71,7 +85,7 @@ class Board extends React.Component {
       <div className="board">
         <div className="status">
           <div className="player">{this.state.player}'s Turn</div>
-          <div className="match"></div>
+          <div className="match">{this.state.gameState}</div>
         </div>
         <Column
           player={this.state.player}

@@ -2,7 +2,7 @@ import React from "react";
 import "./App.css";
 import Board from "./components/board";
 import Modal from "./components/modal";
-import * as tf from '@tensorflow/tfjs';
+import * as tf from "@tensorflow/tfjs";
 
 class App extends React.Component {
   constructor(props) {
@@ -10,20 +10,18 @@ class App extends React.Component {
     this.state = { modal: [] };
   }
   predict = async (arr) => {
-    console.log(arr);
-    this.model = await tf.loadLayersModel('./tfjsmodel/model.json');
     let prediction = this.model.predict(tf.tensor2d(arr, [1, 42]));
     let predictionObject = prediction.arraySync()[0];
     let res = 0;
-    for(let i in predictionObject){
-      if(predictionObject[i] > predictionObject[res]){
+    for (let i in predictionObject) {
+      if (predictionObject[i] > predictionObject[res]) {
         res = i;
       }
     }
     return res;
-  }
-  async componentDidMount(){
-    // this.model = await tf.loadLayersModel('./tfjsmodel/model.json');
+  };
+  async componentDidMount() {
+    this.model = await tf.loadLayersModel("./tfjsmodel/model.json");
   }
   alertModal = (title) => {
     this.setState({ modal: [<Modal key={title} title={title} />] });
