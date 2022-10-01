@@ -17,7 +17,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
-
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
 
 #from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -40,7 +41,9 @@ def mlp(type = None):
         X,Y = load(path + '\\tictac_single.txt')
     elif type == 'final':
          X,Y = load(path + '\\tictac_final.txt')
-         
+
+
+    
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40)
     mlp = MLPClassifier(activation='relu', solver ='adam', max_iter=300).fit(X_train, y_train)
    
@@ -50,6 +53,25 @@ def mlp(type = None):
     
    
     get_cmatrix(mlp, X_test, y_test)
+    
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    acc_score = []
+    #doing K folds split
+    #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
+    for train_index , test_index in kf.split(X):
+        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+     
+    mlp.fit(X_train,Y_train)
+    pred_values = mlp.predict(X_test)
+     
+    acc = accuracy_score(pred_values , Y_test)
+    acc_score.append(acc)
+     
+    avg_acc_score = sum(acc_score)/10
+ 
+    print('accuracy of each fold - {}'.format(acc_score))
+    print('Avg accuracy : {}'.format(avg_acc_score))
     
 
     
@@ -74,6 +96,25 @@ def knn(type = None):
     
     get_cmatrix(neigh, X_test, y_test)
     
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    acc_score = []
+    #doing K folds split
+    #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
+    for train_index , test_index in kf.split(X):
+        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+     
+    neigh.fit(X_train,Y_train)
+    pred_values = neigh.predict(X_test)
+     
+    acc = accuracy_score(pred_values , Y_test)
+    acc_score.append(acc)
+     
+    avg_acc_score = sum(acc_score)/10
+ 
+    print('accuracy of each fold - {}'.format(acc_score))
+    print('Avg accuracy : {}'.format(avg_acc_score))
+    
     
     return neigh
     
@@ -95,10 +136,27 @@ def svm(type = None):
     svm.fit(X_train, y_train)
     crossvalid(svm, X, Y)
     
-
-    
  
     get_cmatrix(svm, X_test, y_test)
+    
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    acc_score = []
+    #doing K folds split
+    #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
+    for train_index , test_index in kf.split(X):
+        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+     
+    svm.fit(X_train,Y_train)
+    pred_values = svm.predict(X_test)
+     
+    acc = accuracy_score(pred_values , Y_test)
+    acc_score.append(acc)
+     
+    avg_acc_score = sum(acc_score)/10
+ 
+    print('accuracy of each fold - {}'.format(acc_score))
+    print('Avg accuracy : {}'.format(avg_acc_score))
  
     return svm
 

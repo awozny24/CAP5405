@@ -14,6 +14,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
+import copy
 import numpy as np
 import classifiers
 
@@ -161,23 +162,29 @@ class gameLayout:
       #unlike the single dataset where the prediction
       #returns the optimal spot on the tic tac toe board
       #you have to search for remaining legal spots and score them
+      
+      #duplicate is a 1 by 9 board not 3 by 3!!!
       empty = self.getEmpty()
       board = board.astype(int)
-      duplicate = board.copy()
+      duplicate = copy.deepcopy(board)
       scores = []
       for legal_moves in empty:
           #drop a -1 player 'O' at one of these valid locations
           #and predict the score, more positive is better
-          duplicate[legal_moves[0]][legal_moves[1]] = '-1'
+          #doing this weird conversion where you get positions on
+          #the 3 by 3 square to index of one hot encoded vector, ex: [0, 0, 0, 0, 1]
+          duplicate[0, int(legal_moves[0]*3) + int(legal_moves[1]) ] = '-1'
           score = classifier.predict(duplicate)
+          #best practice is to associate score with a position on the board
           scores.append(score)
           #equivalent to reset board
-          duplicate = board
+          duplicate = copy.deepcopy(board)
       #find maximum value of list
-      #the index of max val is the prediction
-      max_val = max(scores)
-      max_index = scores.index(max_val)
-    
+      #the index of min val is the prediction
+      min_val = min(scores)
+      min_pos = scores.index(min_val)
+      prediction = empty[min_pos]
+      return prediction
     
       pass
 
