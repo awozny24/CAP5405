@@ -19,10 +19,11 @@ class App extends React.Component {
         res = i;
       }
     }
+    console.log(predictionObject);
     return res;
   };
   async componentDidMount() {
-    // this.model = await tf.loadLayersModel("./tfjsmodel/model.json");÷
+    this.model = await tf.loadLayersModel("./tfjsmodel/model.json");
   }
   alertModal = (title) => {
     this.setState({ modal: [<Modal key={title} title={title} />] });

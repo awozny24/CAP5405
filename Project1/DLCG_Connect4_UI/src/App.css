@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Asap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins");
 
 * {
   padding: 0;
@@ -7,16 +7,13 @@
 }
 
 body {
-  font-family: "Asap", cursive;
+  font-family: "Poppins", cursive;
 }
 .App {
   width: 100vw;
   height: 100vh;
   text-align: center;
   overflow: hidden;
-}
-h1 {
-  margin: 20px 0px;
 }
 
 .block {
@@ -110,4 +107,45 @@ h1 {
   100% {
     width: 100%;
   }
+}
+
+.game-over{
+  height: 100vh;
+  width: 100vw;
+  background-color: #0003;
+  top: 0;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  animation: fade-in 1s;
+}
+@keyframes fade-in {
+  0%{
+    opacity: 0;
+  }  
+  100%{
+    opacity: 1;
+  }
+}
+.game-over .pop-up{
+  margin-top: 300px;
+  background-color: #fff;
+  box-shadow: 3px 4px 9px #0003;
+  width: max-content;
+  height: max-content;
+  padding: 50px 100px;
+  border-radius: 5px;
+}
+.game-over .pop-up .play-again-btn{
+  font-family: 'Poppins';
+  cursor: pointer;
+  background-color: #4289ff;
+  border-radius: 2px;
+  margin: 20px;
+  padding: 15px;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  box-shadow: 2px 3px 3px #0003;
 }

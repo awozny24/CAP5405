@@ -1,6 +1,7 @@
 import React from "react";
 import Column from "./column";
 import * as tf from "@tensorflow/tfjs";
+import GameOver from "./gameover";
 
 class Board extends React.Component {
   constructor(props) {
@@ -15,12 +16,12 @@ class Board extends React.Component {
       5: [0, 0, 0, 0, 0, 0],
       6: [0, 0, 0, 0, 0, 0],
       gameState: "Draw",
-      noOfMoves:0,
+      noOfMoves: 0,
+      gameOver: false,
     };
   }
 
   onBoardClickHandler = () => {
-
     if (this.state.player == "x") {
       this.setState({ player: "o" });
     } else {
@@ -65,93 +66,124 @@ class Board extends React.Component {
           ...this.state[5],
           ...this.state[6],
         ];
-        console.log(arr);
         let res = "";
-        console.log(this.state.noOfMoves);
-        if(this.state.noOfMoves >= 6){
-
+        if (this.state.noOfMoves >= 6) {
           res = await this.props.predictfunc(arr);
-        }else{
-          res = 2;
+        } else {
+          res = 0;
         }
         this.setState((prevState) => {
+          let gameOverState = false;
           let gameNewState = "";
-          if(res == 0){
-            gameNewState = "X Wins";
-          }else if(res == 1){
-            gameNewState = "X Loses";
-          }else{
+          if (res == 0) {
             gameNewState = "Draw";
+          } else if (res == 1) {
+            gameNewState = "X Wins";
+            gameOverState = true;
+          } else {
+            gameNewState = "X Loses";
+            gameOverState = true;
           }
-         return {...prevState, gameState:gameNewState, noOfMoves: this.state.noOfMoves + 1}; 
-        })
+          return {
+            ...prevState,
+            gameState: gameNewState,
+            noOfMoves: this.state.noOfMoves + 1,
+            gameOver: gameOverState,
+          };
+        });
       }
     );
   };
 
+  playAgain = () => {
+    this.setState((prevState) => {
+      return {
+        ...prevState,
+        gameOver: false,
+        0: [0, 0, 0, 0, 0, 0],
+        1: [0, 0, 0, 0, 0, 0],
+        2: [0, 0, 0, 0, 0, 0],
+        3: [0, 0, 0, 0, 0, 0],
+        4: [0, 0, 0, 0, 0, 0],
+        5: [0, 0, 0, 0, 0, 0],
+        6: [0, 0, 0, 0, 0, 0],
+      };
+    });
+  };
+
   render() {
     return (
-      <div className="board">
-        <div className="status">
-          <div className="player">{this.state.player}'s Turn</div>
-          <div className="match">{this.state.gameState}</div>
+      <div>
+        <div className="board">
+          {this.state.gameOver ? (
+            <GameOver
+              result={this.state.gameState}
+              playAgainfunc={this.playAgain}
+            />
+          ) : (
+            <div></div>
+          )}
+          <div className="status">
+            <div className="player">{this.state.player}'s Turn</div>
+            <div className="match">{this.state.gameState}</div>
+          </div>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[0]}
+            columnNo={0}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[1]}
+            columnNo={1}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[2]}
+            columnNo={2}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[3]}
+            columnNo={3}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[4]}
+            columnNo={4}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[5]}
+            columnNo={5}
+          ></Column>
+          <Column
+            player={this.state.player}
+            onBoardClickHandler={this.onBoardClickHandler}
+            boardStateHandler={this.boardStateHandler}
+            alertfunc={this.props.alertfunc}
+            blockSequence={this.state[6]}
+            columnNo={6}
+          ></Column>
         </div>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[0]}
-          columnNo={0}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[1]}
-          columnNo={1}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[2]}
-          columnNo={2}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[3]}
-          columnNo={3}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[4]}
-          columnNo={4}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[5]}
-          columnNo={5}
-        ></Column>
-        <Column
-          player={this.state.player}
-          onBoardClickHandler={this.onBoardClickHandler}
-          boardStateHandler={this.boardStateHandler}
-          alertfunc={this.props.alertfunc}
-          blockSequence={this.state[6]}
-          columnNo={6}
-        ></Column>
       </div>
     );
   }
