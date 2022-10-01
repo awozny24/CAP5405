@@ -10,6 +10,7 @@ class App extends React.Component {
     this.state = { modal: [] };
   }
   predict = async (arr) => {
+    // this.model = await tf.loadLayersModel("./tfjsmodel/model.json");
     let prediction = this.model.predict(tf.tensor2d(arr, [1, 42]));
     let predictionObject = prediction.arraySync()[0];
     let res = 0;
@@ -21,7 +22,7 @@ class App extends React.Component {
     return res;
   };
   async componentDidMount() {
-    this.model = await tf.loadLayersModel("./tfjsmodel/model.json");
+    // this.model = await tf.loadLayersModel("./tfjsmodel/model.json");÷
   }
   alertModal = (title) => {
     this.setState({ modal: [<Modal key={title} title={title} />] });

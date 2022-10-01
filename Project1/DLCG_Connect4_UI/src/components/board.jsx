@@ -14,11 +14,13 @@ class Board extends React.Component {
       4: [0, 0, 0, 0, 0, 0],
       5: [0, 0, 0, 0, 0, 0],
       6: [0, 0, 0, 0, 0, 0],
-      gameState: "Draw"
+      gameState: "Draw",
+      noOfMoves:0,
     };
   }
 
   onBoardClickHandler = () => {
+
     if (this.state.player == "x") {
       this.setState({ player: "o" });
     } else {
@@ -63,10 +65,17 @@ class Board extends React.Component {
           ...this.state[5],
           ...this.state[6],
         ];
-        let res = await this.props.predictfunc(arr);
+        console.log(arr);
+        let res = "";
+        console.log(this.state.noOfMoves);
+        if(this.state.noOfMoves >= 6){
+
+          res = await this.props.predictfunc(arr);
+        }else{
+          res = 2;
+        }
         this.setState((prevState) => {
           let gameNewState = "";
-          console.log(res);
           if(res == 0){
             gameNewState = "X Wins";
           }else if(res == 1){
@@ -74,7 +83,7 @@ class Board extends React.Component {
           }else{
             gameNewState = "Draw";
           }
-         return {...prevState, gameState:gameNewState}; 
+         return {...prevState, gameState:gameNewState, noOfMoves: this.state.noOfMoves + 1}; 
         })
       }
     );
