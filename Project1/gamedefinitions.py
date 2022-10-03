@@ -16,11 +16,18 @@ from sklearn.model_selection import train_test_split, cross_val_score
 import os
 import numpy as np
 import classifiers
+from sys import platform
 
 path = os.getcwd()
 
+
+if platform == 'darwin':
+    slash = '/'
+else: 
+    slash = '\\'
+
 #list out data files
-single = np.loadtxt((path +'/tictac_single.txt'))
+single = np.loadtxt((path + slash + 'tictac_single.txt'))
 
 
 

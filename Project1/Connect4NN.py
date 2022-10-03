@@ -101,6 +101,8 @@ if not os.path.exists("c4NN_model"):
     c4NN.save("c4NN_model")
 
 else:
-  c4NN = keras.models.load_model("c4NN_model")
-  c4NN.evaluate(test_X, test_y_onehot, verbose=2)
-  print(c4NN.predict(test_X[0].reshape(1, test_X.shape[1])))
+    c4NN = keras.models.load_model("c4NN_model")
+    c4NN.evaluate(test_X, test_y_onehot, verbose=2)
+
+
+print(c4NN.predict(test_X[0].reshape(1, test_X.shape[1])))

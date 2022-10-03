@@ -114,10 +114,17 @@ class Regressor:
         self.model = model
 
     
-    def predict(self, X, thresh=None):
+    def fit(self, trainX, trainy):
+        self.model.fit(trainX, trainy)
+
+
+    def predict(self, X, thresh=None, eliminateUsedSquares=True):
         # make prediction and return it
         pred = self.model.predict(X)
+        if eliminateUsedSquares:
+            pred = EliminateUsedSquares(pred, X)
         pred = GetRegressorPredictions(pred, thresh)
+
         return pred
 
 
@@ -203,7 +210,7 @@ def GetRegressorPredictions(pred, thresh=None):
         pred = np.argmax(pred, axis=1)
         return pred
     else:
-        # set predictions above 0.5 to 1, and the ones below 0.5 to 0 and return
+        # set predictions above thresh to 1, and the ones below thresh to 0 and return
         pred[pred[:, np.array(range(0, pred.shape[1]))] >= thresh] = 1
         pred[pred[:, np.array(range(0, pred.shape[1]))] < thresh] = 0
         return pred
@@ -244,6 +251,31 @@ def PredictionAccuracy(pred, y):
         acc = numCorrect / numTotal
         return acc
 
+
+# Get Confusion Matrix
+def GetConfusionMatrix(X, y, model):
+    title = [("Normalized confusion matrix")]
+
+    
+
+    # GetRegressorPredictions
+
+    # title = [("Normalized confusion matrix")]
+    # disp = ConfusionMatrixDisplay.from_estimator(
+    #     classifier,
+    #     testX,
+    #     testy,
+        
+    #     cmap=plt.cm.Blues,
+    #     normalize= 'true',
+    # )
+    # disp.ax_.set_title(title)
+
+    # print(title)
+    # print(disp.confusion_matrix)
+    # plt.show()
+
+
 ######### End Helper Functions ##########
 
 
@@ -268,6 +300,7 @@ if (runLR):
         # print()
 
         # create and train Own Implementation of Linear Regression
+        # lr = LR()
         lr = LR()
         lr.fit(X_train, y_train)
 
@@ -290,12 +323,14 @@ if runKNNR:
     
     for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
         # create and train knn regressor model on training data
+        # knnReg = Regressor(KNNR())
         knnReg = KNNR()
+
         knnReg.fit(X_train, y_train)
 
-        # get predictions
-        # 1 = valid move
-        # 0 = invalid move
+        # # get predictions
+        # # 1 = valid move
+        # # 0 = invalid move
         predTrain = knnReg.predict(X_train)
         predTrain = EliminateUsedSquares(predTrain, X_train)
         predTrain = GetRegressorPredictions(predTrain, thresh=0.5)
@@ -317,6 +352,7 @@ if runMLPR:
     for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
         # define multilayer perceptron regressor model and fit to training data
         mlpReg = MLPRegressor()
+        # mlpReg = Regressor(MLPRegressor())
         mlpReg.fit(X_train, y_train)
 
         # get predictions
@@ -326,7 +362,7 @@ if runMLPR:
         predTrain = EliminateUsedSquares(predTrain, X_train)
         predTrain = GetRegressorPredictions(predTrain, thresh=0.5)
         predTest = mlpReg.predict(X_test)
-        predTest= EliminateUsedSquares(predTest, X_test)
+        predTest = EliminateUsedSquares(predTest, X_test)
         predTest = GetRegressorPredictions(predTest, thresh=0.5)
 
         # print results
@@ -334,4 +370,6 @@ if runMLPR:
         print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train)*100))
         print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test)*100))
         print()
+
+
         
