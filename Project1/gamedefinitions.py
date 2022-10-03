@@ -14,6 +14,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
+import copy
 import numpy as np
 import classifiers
 from sys import platform
@@ -28,7 +29,6 @@ else:
 
 #list out data files
 single = np.loadtxt((path + slash + 'tictac_single.txt'))
-
 
 
 
@@ -149,6 +149,7 @@ class gameLayout:
 
 
   def predict_move(self, classifier, board):
+      #goal is to make reasonable moves for player O
       prediction = None
       board = board.astype(int)
       empty = self.getEmpty()
@@ -163,8 +164,39 @@ class gameLayout:
   
       return prediction
   
+  def predict_move_final(self, classifier, board):
+      #unlike the single dataset where the prediction
+      #returns the optimal spot on the tic tac toe board
+      #you have to search for remaining legal spots and score them
+      
+      #duplicate is a 1 by 9 board not 3 by 3!!!
+      empty = self.getEmpty()
+      board = board.astype(int)
+      duplicate = copy.deepcopy(board)
+      scores = []
+      for legal_moves in empty:
+          #drop a -1 player 'O' at one of these valid locations
+          #and predict the score, more positive is better
+          #doing this weird conversion where you get positions on
+          #the 3 by 3 square to index of one hot encoded vector, ex: [0, 0, 0, 0, 1]
+          duplicate[0, int(legal_moves[0]*3) + int(legal_moves[1]) ] = '-1'
+          score = classifier.predict(duplicate)
+          #best practice is to associate score with a position on the board
+          scores.append(score)
+          #equivalent to reset board
+          duplicate = copy.deepcopy(board)
+      #find maximum value of list
+      #the index of min val is the prediction
+      min_val = min(scores)
+      min_pos = scores.index(min_val)
+      prediction = empty[min_pos]
+      return prediction
     
-  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True):
+      pass
+
+  
+    #need to add logic that supports gameplay for final dataset
+  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True, file = 'single'):
     if startingMove:
         move = self.randMove()
         self.playMove(move, mark)
@@ -192,7 +224,13 @@ class gameLayout:
               test_board = np.array(test_board)
               test_board = test_board.flatten()
               test_board = test_board.reshape(1,-1)
-              move = self.predict_move(classifier,test_board)
+              #depending on what dataset is being used
+              #call predict_move for single dataset
+              #or call predict_move_final for final dataset
+              if (file == 'single'):
+                  move = self.predict_move(classifier,test_board)
+              elif (file == 'final'):
+                  move = self.predict_move_final(classifier,test_board)
     
               #use SVM regression
               #move = self.randMove()
@@ -250,8 +288,12 @@ more often than not player O should win
 # layout.reset_board()
 # layout.gameplay_classification(classifier = mlp)
 
-knn = classifiers.knn('single')
-print("playing game trained on single dataset using linear svm classifier")
-layout.reset_board()
-layout.gameplay_classification(classifier = knn)
+# knn = classifiers.knn('single')
+# print("playing game trained on single dataset using knn classifier")
+# layout.reset_board()
+# layout.gameplay_classification(classifier = knn)
 
+knn = classifiers.knn('final')
+print("playing game trained on final dataset using knn classifier")
+layout.reset_board()
+layout.gameplay_classification(classifier = knn, file ='final')

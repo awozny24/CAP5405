@@ -1,0 +1,151 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins");
+
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+body {
+  font-family: "Poppins", cursive;
+}
+.App {
+  width: 100vw;
+  height: 100vh;
+  text-align: center;
+  overflow: hidden;
+}
+
+.block {
+  height: 100px;
+  width: 100px;
+  background-color: #4289ff;
+  padding: 10px;
+  margin: 1px;
+  border-radius: 3px;
+}
+.block .circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: inset 2px 3px 4px #0003;
+  transition: 0.3s;
+}
+.block .circlex {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: yellow;
+  box-shadow: inset 2px 3px 4px #0003;
+  transition: 0.3s;
+}
+.block .circleo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: red;
+  box-shadow: inset 2px 3px 4px #0003;
+  transition: 0.3s;
+}
+.column {
+  display: inline-block;
+  cursor: pointer;
+}
+.modal {
+  position: absolute;
+  font-size: 20px;
+  padding: 30px;
+  right: -20%;
+  top: 20px;
+  background-color: #4289ff;
+  color: white;
+  text-align: start;
+  width: 150px;
+  box-shadow: 3px 4px 5px #0003;
+  border-radius: 5px;
+  animation: show-hide 2s ease-in;
+}
+@keyframes show-hide {
+  0% {
+    right: -40%;
+  }
+  10% {
+    right: 40px;
+  }
+  15% {
+    right: 20px;
+  }
+  75% {
+    right: 20px;
+  }
+  80% {
+    right: 25px;
+  }
+  100% {
+    right: -100%;
+  }
+}
+.modal .loader {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  width: 2%;
+  background-color: white;
+  animation-delay: 0.5s;
+  animation: loading 1.8s ease-in-out;
+}
+
+@keyframes loading {
+  0% {
+    width: 2%;
+  }
+  80% {
+    width: 100%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.game-over{
+  height: 100vh;
+  width: 100vw;
+  background-color: #0003;
+  top: 0;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  animation: fade-in 1s;
+}
+@keyframes fade-in {
+  0%{
+    opacity: 0;
+  }  
+  100%{
+    opacity: 1;
+  }
+}
+.game-over .pop-up{
+  margin-top: 300px;
+  background-color: #fff;
+  box-shadow: 3px 4px 9px #0003;
+  width: max-content;
+  height: max-content;
+  padding: 50px 100px;
+  border-radius: 5px;
+}
+.game-over .pop-up .play-again-btn{
+  font-family: 'Poppins';
+  cursor: pointer;
+  background-color: #4289ff;
+  border-radius: 2px;
+  margin: 20px;
+  padding: 15px;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  box-shadow: 2px 3px 3px #0003;
+}
