@@ -53,37 +53,38 @@ def RearrangeArray(X):
 
     for row in range(0, numRows):
         if X.ndim != 1:
-        x = X[row, :]
-    else:
-        x = X
-    board = np.zeros([6, 7])
-    for i in range(1, 8):
-        start = 6*(i-1)
-        end = 6*i
-        step = 1
-        board[:, i-1] = np.flip(x[start:end:step])
-    if X.ndim != 1:
-        X[row, :] = board.reshape(board.shape[0]*board.shape[1])
-    else: 
-        # print(board)
-        X = board.reshape(board.shape[0]*board.shape[1])
+            x = X[row, :]
+        else:
+            x = X
+        board = np.zeros([6, 7])
+        for i in range(1, 8):
+            start = 6*(i-1)
+            end = 6*i
+            step = 1
+            board[:, i-1] = np.flip(x[start:end:step])
+        if X.ndim != 1:
+            X[row, :] = board.reshape(board.shape[0]*board.shape[1])
+        else: 
+            # print(board)
+            X = board.reshape(board.shape[0]*board.shape[1])
 
-  return X
+    return X
 
 
 def GetModel():
     # retrieve the data
     npC4DataPath = '.' + slash + "C4Data"
-    if not (os.path.exists(npC4DataPath + '_X.npy') and os.path.exists(npC4DataPath + '_y.npy')):
+    XPath = npC4DataPath + '_X.npy'
+    yPath = npC4DataPath + '_y.npy'
+    if not (os.path.exists(XPath) and os.path.exists(yPath)):
         X, y = GetData(path)
         X = RearrangeArray(X)
-        np.save(npC4DataPath + '_X.npy', X)
-        np.save(npC4DataPath + '_y.npy', y)
-
+        np.save(XPath, X)
+        np.save(yPath, y)
     else:
-        X = np.load(npC4DataPath + '_X.npy')
+        X = np.load(XPath)
         X = RearrangeArray(X)
-        y = np.load(npC4DataPath + '_y.npy')
+        y = np.load(yPath)
 
     # split data in training, validation, and testing
     train_X, dummy_X, train_y, dummy_y = train_test_split(X, y, test_size=0.15, shuffle=True, random_state=randomStateTF)# (, stratify=[-1, 0, 1])

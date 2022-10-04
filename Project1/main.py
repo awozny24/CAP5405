@@ -1,4 +1,11 @@
-True
+import numpy as np
+arr = np.asarray(range(0, 9)).reshape(3, 3)
+arr[0, 1] = 10
+print(arr)
+
+maxi = np.argmax(np.amax(arr, axis=1))
+print(maxi)
+
 # import numpy as np
 # # import tensorflow as tf
 # # import tensorflow.keras as keras
@@ -101,3 +108,76 @@ True
 
 # X = RearrangeArray(X)
 # print(X)
+
+
+
+# # IN CONNECT4_2.PY different tries
+# elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+#                 # print(duplicate.flatten())
+#                 score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
+#                 drawing = score[0][0]
+#                 losing = score[0][1]
+#                 winning = score[0][2]
+#                 # score = winning*losing + drawing/2 * winning
+#                 score = winning * (1 - losing) + drawing * winning
+#                 storeStr.append(str(drawing) + '+' + str(losing) + '+' + str(winning))
+#                 store.append([drawing, losing, winning])
+#                 # score = winning * losing * drawing
+#                 # score = winning * losing
+
+#                 # currBoard = copy.deepcopy(self.board)
+#                 # currBoard[row, col] = 1
+#                 # duplicate2 = copy.deepcopy(currBoard)
+#                 # options2 = self.getLegal()
+#                 # for it2, o in enumerate(options2):
+#                 #     duplicate2 = copy.deepcopy(currBoard)
+#                 #     duplicate2[o[0], o[1]] = 1
+#                 #     duplicate2 = np.where(duplicate2 == 2, -1, duplicate2)
+#                 #     score2 = self.model.predict(duplicate2.flatten().reshape(1, duplicate2.shape[0]*duplicate2.shape[1]))
+#                 #     # prob_mat[it1, it2] = score2[0][2] * score2[0][1] + score2[0][0]/2
+#                 #     prob_mat[it1, it2] = score2[0][1]* score2[0][1]
+
+#                 # score = score2[0][2]
+#                 # score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
+#                 # score = score[0][2]
+                    
+#             scores.append(score)
+#             duplicate = copy.deepcopy(self.board) 
+#         print(storeStr)
+#         #can be index of minimum or maximum value depending on who goes first
+#         if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
+#             min_val = min(scores)
+#             min_pos = scores.index(min_val)
+#             prediction = options[min_pos]
+#             row, col = prediction
+#         elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+#             # max_val = max(scores)
+#             # max_pos = scores.index(max_val)
+#             # prediction = options[max_pos]
+#             # row, col = prediction
+#             # prob_mat = scores * np.ones(prob_mat.shape) * prob_mat
+#             # prob_mat = scores + prob_mat
+#             # prob_mat = scores * prob_mat
+#             # col = np.argmax(np.amax(prob_mat, axis=1), axis=0)
+#             # row, col = np.where(prob_mat == np.amax(prob_mat))
+#             # print(prob_mat)
+
+#             # find the 3 smallest loss values 
+#             store = np.asarray(store)
+#             ind_sort_loss = np.argsort(store[:, 1])
+#             first3 = ind_sort_loss[0:3]
+
+#             # set draw values to 0
+#             store[ind_sort_loss[3:], 0] = 0
+
+#             # find 3 largest draw values
+#             # ind_sort_draw = np.argsort(store[:, 0])
+#             # last3 = ind_sort_draw[-3:]
+#             # store[ind_sort_draw[:-3], 2] = 0
+
+#             print(store)
+
+#             store2 = store[:, 0]/2 + store[:, 1] * store[:, 2]
+
+#             # find the index of the largest winning value
+#             col = np.argmax(np.amax(store2))
