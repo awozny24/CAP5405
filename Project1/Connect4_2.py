@@ -12,6 +12,8 @@ import random
 import Connect4FFNN 
 import torch
 import copy
+import tensorflow as tf
+import tensorflow.keras as keras
 
 #custom exception
 class game_over(Exception):
@@ -29,16 +31,25 @@ output_dim = 1
 
 
 class Game():
-    def __init__ (self):
+    def __init__ (self, dlFrameWork):
          self.board = np.zeros((ROWS,COLUMNS))
+         self.dlFrameWork = dlFrameWork
          #initialize FFNN model here
-         PATH = 'FFNN_MODEL.pt'
-         model = torch.load(PATH)
-         model.eval()
-         self.model = model
+         if (dlFrameWork == 'pytorch') | (dlFrameWork == 'Pytorch'):
+            path = 'FFNN_MODEL.pt'
+            model = torch.load(path)
+            model.eval()
+            self.model = model
+         elif (dlFrameWork == 'tensorflow') | (dlFrameWork == 'TensorFlow') | (dlFrameWork == 'Tensorflow'): 
+            path = 'c4NN_modelRearranged'
+            model = keras.models.load_model(path)
+            self.model = model
+
+
          
     def reset(self):
         self.board = np.zeros((ROWS,COLUMNS))
+
     
     def print_board(self):
         for i in range(ROWS):
@@ -155,9 +166,6 @@ class Game():
                         valid = [np.max(blanks), c]
                         legal.append(valid)     
                      
-                       
-                        
-                 
         return legal
     
     def humanPlayer(self, mark, isActive = False):
@@ -176,7 +184,8 @@ class Game():
         options = self.getLegal()
         duplicate = copy.deepcopy(self.board)
         scores = []
-        for legal_move in options:
+        prob_mat = np.zeros([len(options), 7])
+        for it1, legal_move in enumerate(options):
             #you only need the column values from self.getLegal()
             #to do an insert
             row, col = legal_move
@@ -185,14 +194,58 @@ class Game():
             duplicate = np.where(duplicate == 2, -1, duplicate)
             #Need to do a whole bunch of conversions to get from
             #6x7 to size 42 tensor to dtype float
-            score = self.model(torch.from_numpy(duplicate).flatten().float())
+            # print(torch.from_numpy(duplicate).flatten().float())
+            if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
+                score = self.model(torch.from_numpy(duplicate).flatten().float())
+                print(score)
+            elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+                # print(duplicate.flatten())
+                score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
+                drawing = score[0][0]
+                losing = score[0][1]
+                winning = score[0][2]
+                # score = winning*losing + drawing/2
+                # score = winning * losing * drawing
+                score = winning * losing
+
+                currBoard = copy.deepcopy(self.board)
+                currBoard[row, col] = 1
+                duplicate2 = copy.deepcopy(currBoard)
+                options2 = self.getLegal()
+                for it2, o in enumerate(options2):
+                    duplicate2 = copy.deepcopy(currBoard)
+                    duplicate2[o[0], o[1]] = 1
+                    duplicate2 = np.where(duplicate2 == 2, -1, duplicate2)
+                    score2 = self.model.predict(duplicate2.flatten().reshape(1, duplicate2.shape[0]*duplicate2.shape[1]))
+                    # prob_mat[it1, it2] = score2[0][2] * score2[0][1] + score2[0][0]/2
+                    prob_mat[it1, it2] = score2[0][1]* score2[0][1]
+
+                # score = score2[0][2]
+                # score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
+                # score = score[0][2]
+                    
             scores.append(score)
             duplicate = copy.deepcopy(self.board) 
+        print(scores)
         #can be index of minimum or maximum value depending on who goes first
-        min_val = min(scores)
-        min_pos = scores.index(min_val)
-        prediction = options[min_pos]
-        row, col = prediction
+        if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
+            min_val = min(scores)
+            min_pos = scores.index(min_val)
+            prediction = options[min_pos]
+            row, col = prediction
+        elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+            # max_val = max(scores)
+            # max_pos = scores.index(max_val)
+            # prediction = options[max_pos]
+            # row, col = prediction
+            # prob_mat = scores * np.ones(prob_mat.shape) * prob_mat
+            # prob_mat = scores + prob_mat
+            # prob_mat = scores * prob_mat
+            col = np.argmax(np.amax(prob_mat, axis=1), axis=0)
+            # row, col = np.where(prob_mat == np.amax(prob_mat))
+            print(prob_mat)
+
+
         self.insert(self.board,col,mark)
            
         # empty = self.getEmpty()
@@ -232,7 +285,7 @@ if __name__ == '__main__':
     
     
     
-    g = Game()
+    g = Game('tensorflow')
     # g.board = np.array([
     # [0, 0, 0, 2, 0, 0, 0],
     # [0, 1, 0, 2, 0, 0, 1],

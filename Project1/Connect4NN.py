@@ -45,17 +45,45 @@ def GetData(path):
     # return data
     return data[:, :-1], data[:, -1]
 
+def RearrangeArray(X):
+    if X.ndim != 1:
+        numRows = X.shape[0]
+    else:
+        numRows = 1
+
+    for row in range(0, numRows):
+        if X.ndim != 1:
+        x = X[row, :]
+    else:
+        x = X
+    board = np.zeros([6, 7])
+    for i in range(1, 8):
+        start = 6*(i-1)
+        end = 6*i
+        step = 1
+        board[:, i-1] = np.flip(x[start:end:step])
+    if X.ndim != 1:
+        X[row, :] = board.reshape(board.shape[0]*board.shape[1])
+    else: 
+        # print(board)
+        X = board.reshape(board.shape[0]*board.shape[1])
+
+  return X
+
+
 def GetModel():
     # retrieve the data
     npC4DataPath = '.' + slash + "C4Data"
-    if not os.path.exists(npC4DataPath):
+    if not (os.path.exists(npC4DataPath + '_X.npy') and os.path.exists(npC4DataPath + '_y.npy')):
         X, y = GetData(path)
-        np.save(npC4DataPath + '_X', X)
-        np.save(npC4DataPath + '_y', y)
+        X = RearrangeArray(X)
+        np.save(npC4DataPath + '_X.npy', X)
+        np.save(npC4DataPath + '_y.npy', y)
 
     else:
-        X = np.load(npC4DataPath + '_X')
-        y = np.load(npC4DataPath + '_y')
+        X = np.load(npC4DataPath + '_X.npy')
+        X = RearrangeArray(X)
+        y = np.load(npC4DataPath + '_y.npy')
 
     # split data in training, validation, and testing
     train_X, dummy_X, train_y, dummy_y = train_test_split(X, y, test_size=0.15, shuffle=True, random_state=randomStateTF)# (, stratify=[-1, 0, 1])
@@ -76,7 +104,8 @@ def GetModel():
     max_epochs = 25
     batch_size = 500
 
-    if not os.path.exists("c4NN_model"):
+    modelPath = "c4NN_modelRearranged"
+    if not os.path.exists(modelPath):
         # initialize model and add layers
         c4NN = keras.models.Sequential(name="Connect4Model1")
         c4NN.add(keras.Input(shape=(X.shape[1],), sparse=False)) 
@@ -103,10 +132,10 @@ def GetModel():
 
         loss, acc = c4NN.evaluate(test_X, test_y_onehot, verbose=2)
         print("Model Accuracy: {:5.2f}%".format(100 * acc))
-        c4NN.save("c4NN_model")
+        c4NN.save(modelPath)
 
     else:
-        c4NN = keras.models.load_model("c4NN_model")
+        c4NN = keras.models.load_model(modelPath)
         c4NN.evaluate(test_X, test_y_onehot, verbose=2)
 
 
