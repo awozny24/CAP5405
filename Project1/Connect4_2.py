@@ -12,8 +12,11 @@ import random
 import Connect4FFNN 
 import torch
 import copy
-import tensorflow as tf
-import tensorflow.keras as keras
+import pygame
+import sys
+import math
+
+#work on making pygame UI
 
 #custom exception
 class game_over(Exception):
@@ -27,29 +30,29 @@ SECOND = 2
 input_dim = 42
 hidden_dim = 200
 output_dim = 1
+
+BLUE = (0,0,255)
+BLACK =  (0,0,0)
+WHITE = (255,255,255)
+RED = (255,0,0)
+YELLOW = (255,255,0)
+
+SQUARESIZE = 100
+ 
         
 
 
 class Game():
-    def __init__ (self, dlFrameWork):
+    def __init__ (self):
          self.board = np.zeros((ROWS,COLUMNS))
-         self.dlFrameWork = dlFrameWork
          #initialize FFNN model here
-         if (dlFrameWork == 'pytorch') | (dlFrameWork == 'Pytorch'):
-            path = 'FFNN_MODEL.pt'
-            model = torch.load(path)
-            model.eval()
-            self.model = model
-         elif (dlFrameWork == 'tensorflow') | (dlFrameWork == 'TensorFlow') | (dlFrameWork == 'Tensorflow'): 
-            path = 'c4NN_modelRearranged'
-            model = keras.models.load_model(path)
-            self.model = model
-
-
+         PATH = 'FFNN_MODEL.pt'
+         model = torch.load(PATH)
+         model.eval()
+         self.model = model
          
     def reset(self):
         self.board = np.zeros((ROWS,COLUMNS))
-
     
     def print_board(self):
         for i in range(ROWS):
@@ -143,7 +146,7 @@ class Game():
                 search_space[coord[0],coord[1]] ='1'
                
                # print(search_space)
-                if list(set(self.board[coord[0],coord[1]])) == mark:
+                if list(set(self.board[coord[0],coord[1]])) == [mark]:
                     return True
                 
         return False
@@ -166,11 +169,25 @@ class Game():
                         valid = [np.max(blanks), c]
                         legal.append(valid)     
                      
+                       
+                        
+                 
         return legal
     
-    def humanPlayer(self, mark, isActive = False):
-        val = input(f"player {mark}'s turn, enter column: \n")
-        g.insert_human(int(val),mark)
+    #rework human Player for UI 
+    #no more command line
+    def humanPlayer(self, mark, col):
+        #val = input(f"player {mark}'s turn, enter column: \n")
+        #g.insert_human(int(val),mark)
+        
+        #check if valid
+        if self.valid_choice(col):
+            self.insert(self.board, col, mark)
+        #do nothing if not valid
+        else:
+            pass
+        
+      
         
     def randPlayer(self, mark):
         #get legal values and insert
@@ -184,9 +201,7 @@ class Game():
         options = self.getLegal()
         duplicate = copy.deepcopy(self.board)
         scores = []
-        store = []
-        prob_mat = np.zeros([len(options), 7])
-        for it1, legal_move in enumerate(options):
+        for legal_move in options:
             #you only need the column values from self.getLegal()
             #to do an insert
             row, col = legal_move
@@ -195,148 +210,191 @@ class Game():
             duplicate = np.where(duplicate == 2, -1, duplicate)
             #Need to do a whole bunch of conversions to get from
             #6x7 to size 42 tensor to dtype float
-            # print(torch.from_numpy(duplicate).flatten().float())
-            if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
-                score = self.model(torch.from_numpy(duplicate).flatten().float())
-
-            elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
-                # print(duplicate.flatten())
-                score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
-
-                # get probabilities for draw, lose, win
-                drawing = score[0][0]
-                losing = score[0][1]
-                winning = score[0][2]
-
-                # combine probabilites to get the best score
-                score = winning*losing + drawing / 2
-                # score = winning * losing * drawing
-                # score = winning * losing
-
-                # store history
-                store.append([drawing, losing, winning, score])
-                    
+            score = self.model(torch.from_numpy(duplicate).flatten().float())
             scores.append(score)
             duplicate = copy.deepcopy(self.board) 
         #can be index of minimum or maximum value depending on who goes first
-        if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
-            min_val = min(scores)
-            min_pos = scores.index(min_val)
-            prediction = options[min_pos]
-            row, col = prediction
-        elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
-            max_val = max(scores)
-            max_pos = scores.index(max_val)
-            prediction = options[max_pos]
-            row, col = prediction
-
-
+        min_val = min(scores)
+        min_pos = scores.index(min_val)
+        prediction = options[min_pos]
+        row, col = prediction
         self.insert(self.board,col,mark)
            
-        # empty = self.getEmpty()
-        # board = board.astype(int)
-        # duplicate = copy.deepcopy(board)
-        # scores = []
-        # for legal_moves in empty:
-        #     #drop a -1 player 'O' at one of these valid locations
-        #     #and predict the score, more positive is better
-        #     #doing this weird conversion where you get positions on
-        #     #the 3 by 3 square to index of one hot encoded vector, ex: [0, 0, 0, 0, 1]
-        #     duplicate[0, int(legal_moves[0]*3) + int(legal_moves[1]) ] = '-1'
-        #     score = classifier.predict(duplicate)
-        #     #best practice is to associate score with a position on the board
-        #     scores.append(score)
-        #     #equivalent to reset board
-        #     duplicate = copy.deepcopy(board)
-        # #find maximum value of list
-        # #the index of min val is the prediction
-        # min_val = min(scores)
-        # min_pos = scores.index(min_val)
-        # prediction = empty[min_pos]
-        # return prediction
-    
-               
-                
         
-                
+        
+
+#pygame UI borrowed from askPython    
+def draw_board(board):
+    for c in range(COLUMNS):
+        for r in range(ROWS):
+            pygame.draw.rect(screen, BLUE, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
+            pygame.draw.circle(screen, WHITE, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+     
+    #copy board
+    copy_board = copy.deepcopy(board)
+    copy_board = np.flipud(copy_board)
+    for c in reversed(range(COLUMNS)):
+        for r in range(ROWS):      
+            if copy_board[r][c] == 1:
+                pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+            elif copy_board[r][c] == 2: 
+                pygame.draw.circle(screen, YELLOW, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+    
+    pygame.display.update()
                
+  
+                            
                 
             
                                                               
 if __name__ == '__main__':
-    
-    
-    
-    
-    
-    
-    g = Game('tensorflow')
-    # g.board = np.array([
-    # [0, 0, 0, 2, 0, 0, 0],
-    # [0, 1, 0, 2, 0, 0, 1],
-    # [0, 2, 0, 2, 0, 2, 2],
-    # [0, 1, 2, 1, 1, 1, 2],
-    # [0, 1, 1, 2, 2, 1, 1],
-    # [0, 2, 2, 1, 1, 2, 1],
-    # ])
-    # valid = g.getLegal()
+    #initalize pygame
+    pygame.init()
+
   
+    #define our screen size
+    SQUARESIZE = 100
+  
+    #define width and height of board
+    width = COLUMNS * SQUARESIZE
+    height = (ROWS+1) * SQUARESIZE
+  
+    size = (width, height)
+  
+    RADIUS = int(SQUARESIZE/2 - 5)
+  
+    screen = pygame.display.set_mode(size)
+   
+    
+    g = Game()
+    
+    
+    
+    # valid = g.getLegal()
+   
+    #Calling function draw_board again
+    draw_board(g.board)
+    pygame.display.update()
+  
+    myfont = pygame.font.SysFont("monospace", 75)
+    game_over = False
+    
+    
 
     print("done loading")
     mark = FIRST
-    while ( True):
-        print('\n')
-        g.print_board()
-        # #simulated
-        # g.randPlayer( mark)
-        #evaluate winning move 
-        if (g.winning_move(mark)):
-            print('\n')
-            g.print_board()
+    # while ( True):
+    #     print('\n')
+    #     g.print_board()
+    #     # #simulated
+    #     # g.randPlayer( mark)
+    #     #evaluate winning move 
+    #     if (g.winning_move(mark)):
+    #         print('\n')
+    #         g.print_board()
            
-            print(f"player {mark} has won the game!")
-            break
-        if mark == FIRST:
-            # #call the AI player second
-            g.humanPlayer(FIRST, True)
-            # #g.print_board()
-            mark = SECOND
            
-        else:
-            g.aiPlayer(mark)
-            mark = FIRST
-        if(g.winning_move(mark) == False and g.available_space() == False):
-            print("game ended in a draw")
-            break
+    #         print(f"player {mark} has won the game!")
+    #         break
+    #     if mark == FIRST:
+    #         # #call the AI player second
+            
+    #         # #g.print_board()
+    #         mark = SECOND
+           
+    #     else:
+    #         g.aiPlayer(mark)
+    #         mark = FIRST
+    #     if(g.winning_move(mark) == False and g.available_space() == False):
+    #         print("game ended in a draw")
+    #         break
+    '''
+    /***************************************************************************************
+  *    Connect4 UI
+  *    Author: ASKPYTHON
+  *    Availability: https://www.askpython.com/python/examples/connect-four-game
+  *
+  ***************************************************************************************/
+    '''
         
+
+
     
+	#work on a new while loop for the game starting here
+    #print board will need to be replaced with something else
+  
     
-	
-        #val = input(f"player {mark}'s turn")
-# 		row = input('{}\'s turn: '.format('Red' if turn == RED else 'Yellow'))
-# 		g.insert(int(row), turn)
-# 		turn = YELLOW if turn == RED else RED                
+    #define the shape of the UI in pixels
+    while not game_over:
+     
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.display.quit()
+                pygame.quit()
+                sys.exit()
+                
+            if g.winning_move(mark):
+                label = myfont.render(f"Player {mark} wins!!", 1,BLACK )
+                screen.blit(label, (40,10))
+                game_over = True
                
- 
-    # Check vertical locations for win
-    # for c in range(COLUMN_COUNT):
-    #     for r in range(ROW_COUNT-3):
-    #         if board[r][c] == piece and board[r+1][c] == piece and board[r+2][c] == piece and board[r+3][c] == piece:
-    #             return True
- 
-    # # Check positively sloped diaganols
-    # for c in range(COLUMN_COUNT-3):
-    #     for r in range(ROW_COUNT-3):
-    #         if board[r][c] == piece and board[r+1][c+1] == piece and board[r+2][c+2] == piece and board[r+3][c+3] == piece:
-    #             return True
- 
-    # # Check negatively sloped diaganols
-    # for c in range(COLUMN_COUNT-3):
-    #     for r in range(3, ROW_COUNT):
-    #         if board[r][c] == piece and board[r-1][c+1] == piece and board[r-2][c+2] == piece and board[r-3][c+3] == piece:
-    #             return True
- 
-            
-        
-       
-            
+     
+            if event.type == pygame.MOUSEMOTION:
+                pygame.draw.rect(screen, WHITE, (0,0, width, SQUARESIZE))
+                posx = event.pos[0]
+                if mark == FIRST:
+                    pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+                else: 
+                    pass
+                   
+            pygame.display.update()
+     
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.draw.rect(screen, WHITE, (0,0, width, SQUARESIZE))
+                #print(event.pos)
+                # Ask for Player 1 Input
+                if mark == FIRST:
+                    posx = event.pos[0]
+                    col = int(math.floor(posx/SQUARESIZE))
+                    g.humanPlayer(mark, col)
+                  
+                    mark = SECOND
+                    
+                        
+                else:
+                    #don't need to record on screen events
+                    g.aiPlayer(mark)
+                    mark = FIRST
+                    
+            draw_board(g.board)
+pygame.time.wait(3000)
+pygame.quit()
+     
+                   
+     
+                        
+     
+     
+                # # # Ask for Player 2 Input
+                # else:               
+                #     posx = event.pos[0]
+                #     col = int(math.floor(posx/SQUARESIZE))
+     
+                #     if is_valid_location(board, col):
+                #         row = get_next_open_row(board, col)
+                #         drop_piece(board, row, col, 2)
+     
+                #         if winning_move(board, 2):
+                #             label = myfont.render("Player 2 wins!!", 1, YELLOW)
+                #             screen.blit(label, (40,10))
+                #             game_over = True
+     
+                # print_board(board)
+                # draw_board(self.board)
+     
+                # turn += 1
+                # turn = turn % 2
+     
+                # if game_over:
+                #     pygame.time.wait(3000)
+  
