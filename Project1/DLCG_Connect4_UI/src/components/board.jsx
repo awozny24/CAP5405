@@ -42,7 +42,7 @@ class Board extends React.Component {
         colState.push(this.state[columnNo][i]);
       }
     }
-
+    let res = "";
     this.setState(
       (prevState) => {
         let newState = {};
@@ -58,15 +58,14 @@ class Board extends React.Component {
       },
       async () => {
         let arr = [
-          ...this.state[0],
-          ...this.state[1],
-          ...this.state[2],
-          ...this.state[3],
-          ...this.state[4],
-          ...this.state[5],
-          ...this.state[6],
+          [...this.state[0]],
+          [...this.state[1]],
+          [...this.state[2]],
+          [...this.state[3]],
+          [...this.state[4]],
+          [...this.state[5]],
+          [...this.state[6]],
         ];
-        let res = "";
         if (this.state.noOfMoves >= 6) {
           res = await this.props.predictfunc(arr);
         } else {
@@ -93,23 +92,26 @@ class Board extends React.Component {
         });
       }
     );
+    console.log(this.state.noOfMoves);
+    return this.state.gameState;
   };
 
-  playAgain = () => {
-    this.setState((prevState) => {
-      return {
-        ...prevState,
-        gameOver: false,
-        0: [0, 0, 0, 0, 0, 0],
-        1: [0, 0, 0, 0, 0, 0],
-        2: [0, 0, 0, 0, 0, 0],
-        3: [0, 0, 0, 0, 0, 0],
-        4: [0, 0, 0, 0, 0, 0],
-        5: [0, 0, 0, 0, 0, 0],
-        6: [0, 0, 0, 0, 0, 0],
-      };
-    });
-  };
+  // playAgain = () => {
+  //   this.setState((prevState) => {
+  //     return {
+  //       ...prevState,
+  //       gameOver: false,
+  //       0: [0, 0, 0, 0, 0, 0],
+  //       1: [0, 0, 0, 0, 0, 0],
+  //       2: [0, 0, 0, 0, 0, 0],
+  //       3: [0, 0, 0, 0, 0, 0],
+  //       4: [0, 0, 0, 0, 0, 0],
+  //       5: [0, 0, 0, 0, 0, 0],
+  //       6: [0, 0, 0, 0, 0, 0],
+  //     };
+  //   });
+
+  // };
 
   render() {
     return (

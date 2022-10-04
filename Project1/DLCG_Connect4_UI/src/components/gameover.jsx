@@ -8,7 +8,7 @@ class GameOver extends React.Component{
                 <h1>Game Over!</h1>
                 <br/>
                 <h2>{this.props.result}</h2>
-                <button className="play-again-btn" onClick={this.props.playAgainfunc}>Play Again</button>
+                <button className="play-again-btn" onClick={() => window.location.reload()}>Play Again</button>
             </div>
         </div>
     }

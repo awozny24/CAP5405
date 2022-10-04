@@ -13,7 +13,10 @@ class Column extends React.Component {
         filledblock: this.state.filledblock + 1,
       });
 
-      this.props.boardStateHandler(this.props.columnNo, this.state.filledblock);
+      let res = this.props.boardStateHandler(
+        this.props.columnNo,
+        this.state.filledblock
+      );
       this.props.onBoardClickHandler();
     } else {
       this.props.alertfunc("Invalid Move");
