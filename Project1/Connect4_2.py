@@ -117,7 +117,7 @@ class Game():
                 coord = [i,j]
                 search_space[coord[0],coord[1]] ='1'
                # print(search_space)
-                if list(set(self.board[coord[0],coord[1]])) == mark:
+                if list(set(self.board[coord[0],coord[1]])) == [mark]:
                     return True
                
         #Upwards Diag
