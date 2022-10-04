@@ -15,6 +15,8 @@ import copy
 import pygame
 import sys
 import math
+import tensorflow as tf
+import tensorflow.keras as keras
 
 #work on making pygame UI
 
@@ -43,13 +45,19 @@ SQUARESIZE = 100
 
 
 class Game():
-    def __init__ (self):
-         self.board = np.zeros((ROWS,COLUMNS))
-         #initialize FFNN model here
-         PATH = 'FFNN_MODEL.pt'
-         model = torch.load(PATH)
-         model.eval()
-         self.model = model
+    def __init__ (self, dlFrameWork):
+        self.board = np.zeros((ROWS,COLUMNS))
+        self.dlFrameWork = dlFrameWork
+        #initialize FFNN model here
+        if (dlFrameWork == 'pytorch') | (dlFrameWork == 'Pytorch'):
+            path = 'FFNN_MODEL.pt'
+            model = torch.load(path)
+            model.eval()
+            self.model = model
+        elif (dlFrameWork == 'tensorflow') | (dlFrameWork == 'TensorFlow') | (dlFrameWork == 'Tensorflow'): 
+            path = 'c4NN_modelRearranged'
+            model = keras.models.load_model(path)
+            self.model = model
          
     def reset(self):
         self.board = np.zeros((ROWS,COLUMNS))
@@ -201,6 +209,7 @@ class Game():
         options = self.getLegal()
         duplicate = copy.deepcopy(self.board)
         scores = []
+        store = []
         for legal_move in options:
             #you only need the column values from self.getLegal()
             #to do an insert
@@ -210,14 +219,41 @@ class Game():
             duplicate = np.where(duplicate == 2, -1, duplicate)
             #Need to do a whole bunch of conversions to get from
             #6x7 to size 42 tensor to dtype float
-            score = self.model(torch.from_numpy(duplicate).flatten().float())
+            if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
+                score = self.model(torch.from_numpy(duplicate).flatten().float())
+
+            elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+                # print(duplicate.flatten())
+                score = self.model.predict(duplicate.flatten().reshape(1, duplicate.shape[0]*duplicate.shape[1]))
+
+                # get probabilities for draw, lose, win
+                drawing = score[0][0]
+                losing = score[0][1]
+                winning = score[0][2]
+
+                # combine probabilites to get the best score
+                print(row)
+                score = winning*losing + drawing / 2
+                # score = winning * losing * drawing
+                # score = winning * losing
+
+                # store history
+                store.append([drawing, losing, winning, score])
+
             scores.append(score)
             duplicate = copy.deepcopy(self.board) 
         #can be index of minimum or maximum value depending on who goes first
-        min_val = min(scores)
-        min_pos = scores.index(min_val)
-        prediction = options[min_pos]
-        row, col = prediction
+        if (self.dlFrameWork == 'pytorch') | (self.dlFrameWork == 'Pytorch'):
+            min_val = min(scores)
+            min_pos = scores.index(min_val)
+            prediction = options[min_pos]
+            row, col = prediction
+        elif (self.dlFrameWork == 'tensorflow') | (self.dlFrameWork == 'TensorFlow') | (self.dlFrameWork == 'Tensorflow'): 
+            max_val = max(scores)
+            max_pos = scores.index(max_val)
+            prediction = options[max_pos]
+            row, col = prediction
+
         self.insert(self.board,col,mark)
            
         
@@ -266,7 +302,7 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode(size)
    
     
-    g = Game()
+    g = Game('tensorflow')
     
     
     
