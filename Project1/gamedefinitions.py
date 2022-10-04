@@ -17,18 +17,12 @@ import os
 import copy
 import numpy as np
 import classifiers
-from sys import platform
 
 path = os.getcwd()
 
-
-if platform == 'darwin':
-    slash = '/'
-else: 
-    slash = '\\'
-
 #list out data files
-single = np.loadtxt((path + slash + 'tictac_single.txt'))
+single = np.loadtxt((path +'\\tictac_single.txt'))
+
 
 
 
@@ -269,7 +263,7 @@ layout.gameplay()
 
 ''' 
 uses classifiers
-trained on single dataset
+trained on single and final dataset
 to predict the best move for 
 player O
 player X still makes 
@@ -277,6 +271,41 @@ random moves
 
 more often than not player O should win
 '''
+if __name__ == '__main__':
+    
+    knn = classifiers.knn('final')
+    print("playing game trained on final dataset using knn classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = knn, file ='final')
+    
+    svm = classifiers.svm('final')
+    print("playing game trained on final dataset using svm classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = svm, file ='final')
+    
+    mlp = classifiers.mlp('final')
+    print("playing game trained on final dataset using mlp classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = mlp, file ='final')
+    
+    knn = classifiers.knn('single')
+    print("playing game trained on final dataset using knn classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = knn, file ='single')
+    
+    svm = classifiers.svm('single')
+    print("playing game trained on final dataset using svm classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = svm, file ='single')
+    
+    mlp = classifiers.mlp('single')
+    print("playing game trained on final dataset using mlp classifier")
+    layout.reset_board()
+    layout.gameplay_classification(classifier = mlp, file ='single')
+    
+    
+    
+    
 # svm = classifiers.svm('single')
 # print("playing game trained on single dataset using linear svm classifier")
 # layout.reset_board()
@@ -293,7 +322,4 @@ more often than not player O should win
 # layout.reset_board()
 # layout.gameplay_classification(classifier = knn)
 
-knn = classifiers.knn('final')
-print("playing game trained on final dataset using knn classifier")
-layout.reset_board()
-layout.gameplay_classification(classifier = knn, file ='final')
+
