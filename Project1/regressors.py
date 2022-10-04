@@ -289,174 +289,219 @@ def GetBinaryConfusionMatrix(TP, TN, FP, FN, model_name, normalize=True):
 ######### End Helper Functions ##########
 
 
-# get data in folds
-X_train_fold, X_test_fold, y_train_fold, y_test_fold = LoadMultiData(path, k_folds=5, random_state=randomState, shufflePostSplit=True)
+def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thresh=None, eliminateUsedSquares=True):
+    # get data in folds
+    X_train_fold, X_test_fold, y_train_fold, y_test_fold = LoadMultiData(path, k_folds=k_folds, random_state=randomState, shufflePostSplit=True)
+
+    runLR = False
+    runKNNR = False
+    runMLPR = False
+
+    if (model_type == "lr") or (model_type == "LinearRegression") \
+        or (model_type == "LR") or (model_type == "Linear Regression") \
+        or (model_type == "linear regression") or (model_type == "linearregression"):
+        runLR = True
+    elif ("knn" in model_type) or ("KNN" in model_type) or ("Knn" in model_type) \
+        or ("earest" in model_type) or ("eighbor" in model_type):
+        runKNNR = True
+    elif ("mlp" in model_type) or ("MLP" in model_type) or ("Mlp" in model_type) \
+        or ("ultilayer" in model_type) or ("erceptron" in model_type):
+        runMLPR = True
+
+    testAccs = []
 
 
-runLR = True
-runKNNR = True
-runMLPR = True
+    # Linear Regression Training and Testing
+    # train and predict next moves
+    if (runLR):
 
-# Linear Regression Training and Testing
-# train and predict next moves
-if (runLR):
+        # initialize variables for calculating confusion matrix
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
 
-    # initialize variables for calculating confusion matrix
-    TP = 0
-    TN = 0
-    FP = 0
-    FN = 0
+        lrModels = []
 
-    lrModels = []
+        lrModelPath = '.' + slash + "RegModels" + slash + "lrModels.joblib"
 
-    lrModelPath = '.' + slash + "RegModels" + slash + "lrModels.joblib"
+        # for each fold
+        for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
+            # Sklearn Linear Regression
+            # predL, sklearnLRModels = TrainAndPredictNextMove(sklearn.linear_model.LinearRegression())
+            # print(f"Number of Correct Predictions: {sum(y_test[np.array(range(0, y_test.shape[0])), predL])}")
+            # print("Accuracy Sklearn Linear Regression: {:.2f}%".format(LRAccuracy(predL, y=y_test)*100))
+            # print()
 
-    # for each fold
-    for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
-        # Sklearn Linear Regression
-        # predL, sklearnLRModels = TrainAndPredictNextMove(sklearn.linear_model.LinearRegression())
-        # print(f"Number of Correct Predictions: {sum(y_test[np.array(range(0, y_test.shape[0])), predL])}")
-        # print("Accuracy Sklearn Linear Regression: {:.2f}%".format(LRAccuracy(predL, y=y_test)*100))
-        # print()
+            # get linear regression models from storage if they exist
+            if not os.path.exists(lrModelPath):
+                # lr = LR()
+                lr = Regressor(LR())
+                lr.fit(X_train, y_train)
+                lrModels.append(lr)
+            else:
+                lrModels = load(lrModelPath)
+                lr = lrModels[i]
 
-        # get linear regression models from storage if they exist
+
+            # get predictions
+            # 1 = valid move
+            # 0 = invalid move
+            predTrain = lr.predict(X_train, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
+            predTest  = lr.predict(X_test, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
+
+            # update parameters for confusion matrix
+            # TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
+            # TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
+            # FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
+            # FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
+
+            
+            # print accuracies
+            trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
+            testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            testAccs.append(testAcc)
+            if print_acc:
+                print("Accuracy Linear Regression")
+                print("  Training: {:.2f}%".format(trainAcc))
+                print("  Testing: {:.2f}%".format(testAcc))
+                print()
+
+        # GetBinaryConfusionMatrix(TP, TN, FP, FN, "Linear Regression", normalize=True)
+
+        # save models if not already saved
         if not os.path.exists(lrModelPath):
-            # lr = LR()
-            lr = Regressor(LR())
-            lr.fit(X_train, y_train)
-            lrModels.append(lr)
-        else:
-            lrModels = load(lrModelPath)
-            lr = lrModels[i]
+            dump(lrModels, lrModelPath) 
+
+        # find the model with the best testing accuracy and return
+        max_acc = max(testAccs)
+        max_ind = testAccs.index(max_acc)
+        return lrModels[max_ind]
 
 
-        # get predictions
-        # 1 = valid move
-        # 0 = invalid move
-        predTrain = lr.predict(X_train, thresh=None, eliminateUsedSquares=True)
-        predTest  = lr.predict(X_test, thresh=None, eliminateUsedSquares=True)
+    # K-Nearest Neighbors Training and Testing
+    if runKNNR:
+        
+        # initialize variables for calculating confusion matrix
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
 
-        # update parameters for confusion matrix
-        # TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
-        # TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
-        # FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
-        # FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
+        knnRegModels = []
 
-        # print accuracies
-        print("Accuracy Linear Regression")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y=y_train)*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y=y_test)*100))
-        print()
+        knnRegModelPath = '.' + slash + "RegModels" + slash + "knnRegModels.joblib"
 
-    # GetBinaryConfusionMatrix(TP, TN, FP, FN, "Linear Regression", normalize=True)
+        # for each fold
+        for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
+            # create and train knn regressor model on training data
+            if not os.path.exists(knnRegModelPath):
+                knnReg = Regressor(KNNR())
+                # knnReg = KNNR()
+                knnReg.fit(X_train, y_train)
+                knnRegModels.append(knnReg)
+            else: 
+                knnRegModels = load(knnRegModelPath)
+                knnReg = knnRegModels[i]
 
-    # save models if not already saved
-    if not os.path.exists(lrModelPath):
-        dump(lrModels, lrModelPath) 
+            # get predictions
+            # 1 = valid move
+            # 0 = invalid move
+            predTrain = knnReg.predict(X_train, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
+            predTest = knnReg.predict(X_test, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
 
-
-
-
-# K-Nearest Neighbors Training and Testing
-if runKNNR:
+            # print accuracies
+            trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
+            testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            testAccs.append(testAcc)
+            if print_acc:
+                print("K-Nearest Neighbors Regressor Accuracy")
+                print("  Training: {:.2f}%".format(trainAcc))
+                print("  Testing: {:.2f}%".format(testAcc))
+                print()
     
-    # initialize variables for calculating confusion matrix
-    TP = 0
-    TN = 0
-    FP = 0
-    FN = 0
+            if thresh is not None:
+                # update parameters for confusion matrix
+                TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
+                TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
+                FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
+                FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
 
-    knnRegModels = []
+        if get_conf_mat:
+            GetBinaryConfusionMatrix(TP, TN, FP, FN, "KNN_Reg", normalize=True)
 
-    knnRegModelPath = '.' + slash + "RegModels" + slash + "knnRegModels.joblib"
-
-    # for each fold
-    for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
-        # create and train knn regressor model on training data
+        # save models if not already saved
         if not os.path.exists(knnRegModelPath):
-            knnReg = Regressor(KNNR())
-            # knnReg = KNNR()
-            knnReg.fit(X_train, y_train)
-            knnRegModels.append(knnReg)
-        else: 
-            knnRegModels = load(knnRegModelPath)
-            knnReg = knnRegModels[i]
+            dump(knnRegModels, knnRegModelPath) 
 
-        # get predictions
-        # 1 = valid move
-        # 0 = invalid move
-        predTrain = knnReg.predict(X_train, thresh=0.5, eliminateUsedSquares=True)
-        predTest = knnReg.predict(X_test, thresh=0.5, eliminateUsedSquares=True)
-
-        # print results
-        print("K-Nearest Neighbors Regressor Accuracy")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train)*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test)*100))
-        print()
- 
-        # update parameters for confusion matrix
-        TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
-        TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
-        FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
-        FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
-
-    GetBinaryConfusionMatrix(TP, TN, FP, FN, "KNN_Reg", normalize=True)
-
-    # save models if not already saved
-    if not os.path.exists(knnRegModelPath):
-        dump(knnRegModels, knnRegModelPath) 
+        # find the model with the best testing accuracy and return
+        max_acc = max(testAccs)
+        max_ind = testAccs.index(max_acc)
+        return knnRegModels[max_ind]
 
 
-# Multi-Layer Perceptron Model Training and Testing
-# create and train mlp regressor model on training data
-if runMLPR:
+    # Multi-Layer Perceptron Model Training and Testing
+    # create and train mlp regressor model on training data
+    if runMLPR:
 
-    # initialize variables for calculating confusion matrix
-    TP = 0
-    TN = 0
-    FP = 0
-    FN = 0
+        # initialize variables for calculating confusion matrix
+        TP = 0
+        TN = 0
+        FP = 0
+        FN = 0
 
-    mlpRegModels = []
+        mlpRegModels = []
 
-    mlpRegModelPath = '.' + slash + "RegModels" + slash + "mlpRegModels.joblib"
+        mlpRegModelPath = '.' + slash + "RegModels" + slash + "mlpRegModels.joblib"
 
-    # for each fold
-    for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
-        # define multilayer perceptron regressor model and fit to training data
-        
+        # for each fold
+        for i, (X_train, X_test, y_train, y_test) in enumerate(zip(X_train_fold, X_test_fold, y_train_fold, y_test_fold)):
+            # define multilayer perceptron regressor model and fit to training data
+            
+            if not os.path.exists(mlpRegModelPath):
+                mlpReg = Regressor(MLPRegressor(max_iter=500))
+                mlpReg.fit(X_train, y_train)
+                mlpRegModels.append(mlpReg)
+            else: 
+                mlpRegModels = load(mlpRegModelPath)
+                mlpReg = mlpRegModels[i]
+
+            # get predictions
+            # 1 = valid move
+            # 0 = invalid move
+            predTrain = mlpReg.predict(X_train, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
+            predTest = mlpReg.predict(X_test, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
+
+            if thresh is not None:
+                # update parameters for confusion matrix
+                TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
+                TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
+                FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
+                FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
+
+            # print accuracies
+            trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
+            testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            testAccs.append(testAcc)
+            if print_acc:
+                print("MultiLayer Perceptron Regressor Accuracy")
+                print("  Training: {:.2f}%".format(trainAcc))
+                print("  Testing: {:.2f}%".format(testAcc))
+                print()
+
+        if get_conf_mat:
+            GetBinaryConfusionMatrix(TP, TN, FP, FN, "MLP_Reg", normalize=True)
+
+        # save models if not already saved
         if not os.path.exists(mlpRegModelPath):
-            mlpReg = Regressor(MLPRegressor(max_iter=500))
-            mlpReg.fit(X_train, y_train)
-            mlpRegModels.append(mlpReg)
-        else: 
-            mlpRegModels = load(mlpRegModelPath)
-            mlpReg = mlpRegModels[i]
+            dump(mlpRegModels, mlpRegModelPath) 
 
-        # get predictions
-        # 1 = valid move
-        # 0 = invalid move
-        predTrain = mlpReg.predict(X_train, thresh=0.5, eliminateUsedSquares=True)
-        predTest = mlpReg.predict(X_test, thresh=0.5, eliminateUsedSquares=True)
-
-        # update parameters for confusion matrix
-        TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
-        TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
-        FP = FP + np.sum(np.logical_and(predTest == 1, y_test == 0))
-        FN = FN + np.sum(np.logical_and(predTest == 0, y_test == 1))
-
-        # print results
-        print("MultiLayer Perceptron Regressor Accuracy")
-        print("  Training: {:.2f}%".format(PredictionAccuracy(predTrain, y_train)*100))
-        print("  Testing: {:.2f}%".format(PredictionAccuracy(predTest, y_test)*100))
-        print()
-
-    GetBinaryConfusionMatrix(TP, TN, FP, FN, "MLP_Reg", normalize=True)
-
-    # save models if not already saved
-    if not os.path.exists(mlpRegModelPath):
-        dump(mlpRegModels, mlpRegModelPath) 
-
-
+        # find the model with the best testing accuracy and return
+        max_acc = max(testAccs)
+        max_ind = testAccs.index(max_acc)
+        return mlpRegModels[max_ind]
         
-        
+if __name__ == '__main__':
+    GetRegModel("lr", print_acc=True)
+    GetRegModel("knn", print_acc=True)
+    GetRegModel("mlp", print_acc=True)

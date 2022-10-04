@@ -14,14 +14,22 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
+from sys import platform
 import copy
 import numpy as np
 import classifiers
+import regressors
+
 
 path = os.getcwd()
 
+if platform == 'darwin':
+    slash = '/'
+else: 
+    slash = '\\'
+
 #list out data files
-single = np.loadtxt((path +'\\tictac_single.txt'))
+single = np.loadtxt(path + slash + 'tictac_single.txt')
 
 
 
@@ -249,6 +257,9 @@ class gameLayout:
    
 
 
+
+
+
 layout = gameLayout()
 layout.print_board()
 
@@ -273,35 +284,58 @@ more often than not player O should win
 '''
 if __name__ == '__main__':
     
-    knn = classifiers.knn('final')
-    print("playing game trained on final dataset using knn classifier")
+    runClassifiers = False
+    if runClassifiers:
+        knn = classifiers.knn('final')
+        print("playing game trained on final dataset using knn classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = knn, file ='final')
+        
+        svm = classifiers.svm('final')
+        print("playing game trained on final dataset using svm classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = svm, file ='final')
+        
+        mlp = classifiers.mlp('final')
+        print("playing game trained on final dataset using mlp classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = mlp, file ='final')
+        
+        knn = classifiers.knn('single')
+        print("playing game trained on final dataset using knn classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = knn, file ='single')
+        
+        svm = classifiers.svm('single')
+        print("playing game trained on final dataset using svm classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = svm, file ='single')
+        
+        mlp = classifiers.mlp('single')
+        print("playing game trained on final dataset using mlp classifier")
+        layout.reset_board()
+        layout.gameplay_classification(classifier = mlp, file ='single')
+
+
+    # linear regression model used for classification
+    lr = regressors.GetRegModel('lr', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = knn, file ='final')
-    
-    svm = classifiers.svm('final')
-    print("playing game trained on final dataset using svm classifier")
+    layout.gameplay_classification(classifier = lr, file ='single')
+    print("End LR")
+
+    # knn regression model used for classification
+    knnr = regressors.GetRegModel('knn', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = svm, file ='final')
-    
-    mlp = classifiers.mlp('final')
-    print("playing game trained on final dataset using mlp classifier")
+    layout.gameplay_classification(classifier = knnr, file ='single')
+    print("End KNNR")
+
+    # multilayer perceptron regression model used for classification
+    mlpr = regressors.GetRegModel('mlp', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = mlp, file ='final')
-    
-    knn = classifiers.knn('single')
-    print("playing game trained on final dataset using knn classifier")
-    layout.reset_board()
-    layout.gameplay_classification(classifier = knn, file ='single')
-    
-    svm = classifiers.svm('single')
-    print("playing game trained on final dataset using svm classifier")
-    layout.reset_board()
-    layout.gameplay_classification(classifier = svm, file ='single')
-    
-    mlp = classifiers.mlp('single')
-    print("playing game trained on final dataset using mlp classifier")
-    layout.reset_board()
-    layout.gameplay_classification(classifier = mlp, file ='single')
+    layout.gameplay_classification(classifier = mlpr, file ='single')
+    print("End MLPR")
+
+
     
     
     
@@ -310,7 +344,6 @@ if __name__ == '__main__':
 # print("playing game trained on single dataset using linear svm classifier")
 # layout.reset_board()
 # layout.gameplay_classification(classifier = svm)
-
 
 # mlp = classifiers.mlp('single')
 # print("playing game trained on single dataset using mlp classifier")

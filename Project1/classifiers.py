@@ -24,8 +24,12 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
+from sys import platform
 
-
+if platform == 'darwin':
+    slash = '/'
+else: 
+    slash = '\\'
 
 path = os.getcwd() 
 
@@ -38,9 +42,9 @@ def load(path):
 
 def mlp(type = None):
     if type == 'single':
-        X,Y = load(path + '\\tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + '\\tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt')
 
 
     
@@ -59,7 +63,11 @@ def mlp(type = None):
     #doing K folds split
     #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
     for train_index , test_index in kf.split(X):
-        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        try:
+            X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        except:
+            X_train , X_test = X[train_index,:],X[test_index,:]
+
         Y_train , Y_test = Y[train_index] , Y[test_index]
      
     mlp.fit(X_train,Y_train)
@@ -80,9 +88,9 @@ def mlp(type = None):
 
 def knn(type = None):
     if type == 'single':
-        X,Y = load(path + '\\tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + '\\tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt')
     
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
     neigh = KNeighborsClassifier(n_neighbors=3)
@@ -101,7 +109,10 @@ def knn(type = None):
     #doing K folds split
     #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
     for train_index , test_index in kf.split(X):
-        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        try:
+            X_train , X_test = X.iloc[train_index,:], X.iloc[test_index,:]
+        except:
+            X_train , X_test = X[train_index,:], X[test_index,:]
         Y_train , Y_test = Y[train_index] , Y[test_index]
      
     neigh.fit(X_train,Y_train)
@@ -124,9 +135,9 @@ def knn(type = None):
 #want to change this to just svm
 def svm(type = None):
     if type == 'single':
-        X,Y = load(path + '\\tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt')
     elif type == 'final':
-         X,Y = load(path + '\\tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt')
        
     # Splitting training and testing samples
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
@@ -144,7 +155,10 @@ def svm(type = None):
     #doing K folds split
     #KFolds code resource: https://www.askpython.com/python/examples/k-fold-cross-validation
     for train_index , test_index in kf.split(X):
-        X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        try:
+            X_train , X_test = X.iloc[train_index,:],X.iloc[test_index,:]
+        except:
+            X_train , X_test = X[train_index,:],X[test_index,:]
         Y_train , Y_test = Y[train_index] , Y[test_index]
      
     svm.fit(X_train,Y_train)
