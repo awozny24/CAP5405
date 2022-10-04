@@ -232,10 +232,9 @@ class Game():
                 winning = score[0][2]
 
                 # combine probabilites to get the best score
-                print(row)
-                score = winning*losing + drawing / 2
+                # score = winning*losing + drawing / 2
                 # score = winning * losing * drawing
-                # score = winning * losing
+                score = winning * losing
 
                 # store history
                 store.append([drawing, losing, winning, score])
