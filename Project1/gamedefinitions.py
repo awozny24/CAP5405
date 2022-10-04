@@ -198,9 +198,14 @@ class gameLayout:
 
   
     #need to add logic that supports gameplay for final dataset
-  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True, file = 'single'):
+  def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True, file = 'single', randMove=False):
     if startingMove:
-        move = self.randMove()
+        if randMove:
+            move = self.randMove()
+        else: 
+            move = input("Choose space to move:\n")
+            move = int(move)
+            move = [int(move//3), int(move%3)]
         self.playMove(move, mark)
         win = None
         self.print_board()
@@ -242,7 +247,12 @@ class gameLayout:
               self.print_board()
               
           elif(mark == 'X'):
-              move = self.randMove()
+              if randMove:
+                  move = self.randMove()
+              else: 
+                  move = input("Choose space to move:\n")
+                  move = int(move)
+                  move = [int(move//3), int(move%3)]
               self.playMove(move, mark)
               win = self.checkVictory()
               print('\n\n')
@@ -320,19 +330,19 @@ if __name__ == '__main__':
     # linear regression model used for classification
     lr = regressors.GetRegModel('lr', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = lr, file ='single')
+    layout.gameplay_classification(classifier = lr, file ='single', randMove=True)
     print("End LR")
 
     # knn regression model used for classification
     knnr = regressors.GetRegModel('knn', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = knnr, file ='single')
+    layout.gameplay_classification(classifier = knnr, file ='single', randMove=True)
     print("End KNNR")
 
     # multilayer perceptron regression model used for classification
     mlpr = regressors.GetRegModel('mlp', print_acc=False, get_conf_mat=False)
     layout.reset_board()
-    layout.gameplay_classification(classifier = mlpr, file ='single')
+    layout.gameplay_classification(classifier = mlpr, file ='single', randMove=True)
     print("End MLPR")
 
 
