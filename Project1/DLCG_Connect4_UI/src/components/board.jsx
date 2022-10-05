@@ -87,10 +87,10 @@ class Board extends React.Component {
             if (res == 0) {
               gameNewState = "Draw";
             } else if (res == 1) {
-              gameNewState = "X Wins";
+              gameNewState = "Yellow Wins";
               gameOverState = true;
             } else {
-              gameNewState = "X Loses";
+              gameNewState = "Red Wins";
               gameOverState = true;
             }
             return {
