@@ -30,5 +30,24 @@ from sys import platform
 # regressors.GetRegModel("mlp", k_folds=10, print_acc=True, retrain=True, dataProp=0.1)
 # print("############## END REGRESSOR CLASSIFICATION RESULTS ################\n")
 
+
+# print("\n##################################################################")
+# print("################## BEGIN CLASSIFICATION RESULTS ##################")
+# print("##################################################################")
+# print()
+# print("#################################################")
+# print("############# Training on All Data ##############")
+# print("#################################################")
 classifiers.svm('single', dataProp=1.0, print_cmatrix=True, print_acc=True)
-# classifiers.knn('single', dataProp=0.1, print_cmatrix=True, print_acc=True)
+classifiers.knn('single', dataProp=1.0, print_cmatrix=True, print_acc=True)
+classifiers.mlp('single', dataProp=1.0, print_cmatrix=True, print_acc=True)
+# print()
+# print("#################################################")
+# print("############# Training on 1/10 Data #############")
+# print("#################################################")
+classifiers.svm('single', dataProp=0.1, print_cmatrix=True, print_acc=True)
+classifiers.knn('single', dataProp=0.1, print_cmatrix=True, print_acc=True)
+classifiers.mlp('single', dataProp=0.1, print_cmatrix=True, print_acc=True)
+# print("################### END CLASSIFICATION RESULTS ###################")
+
+

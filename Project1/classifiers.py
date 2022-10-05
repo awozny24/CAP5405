@@ -20,6 +20,9 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 
+from sklearn.utils._testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
+
 #from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -45,6 +48,7 @@ def load(path, dataProp=1.0):
   return X, Y
 
 
+@ignore_warnings(category=ConvergenceWarning)
 def mlp(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     if type == 'single':
         X,Y = load(path + slash + 'tictac_single.txt', dataProp)
@@ -57,32 +61,51 @@ def mlp(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     mlp = MLPClassifier(activation='relu', solver ='adam', max_iter=300).fit(X_train, y_train)
    
     
-    print(" cross validation scores:")
-    crossvalid(mlp, X, Y)
-    
     if print_cmatrix:
-        get_cmatrix(mlp, X_test, y_test)
+        get_cmatrix(mlp, X_test, y_test, "Multilayer Perceptron")
 
-    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    print("Cross Validation Scores:")
+    crossvalid(mlp, X, Y)
+
+    train_acc_score = []
     acc_score = []
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
     for train_index , test_index in kf.split(X):
-        try:
-            X_train , X_test = X[train_index,:],X[test_index,:]
-            Y_train , Y_test = Y[train_index] , Y[test_index]
-            mlp.fit(X_train,np.ravel(Y_train))
-            pred_values = mlp.predict(X_test)
-            acc = accuracy_score(pred_values , np.ravel(Y_test))
-            acc_score.append(acc)
-            
-        except:
-            X_train , X_test = X[train_index,:],X[test_index,:]
+        X_train , X_test = X[train_index,:],X[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+        mlp.fit(X_train,np.ravel(Y_train))
+        train_pred_values = mlp.predict(X_train)
+        pred_values = mlp.predict(X_test)
+        train_acc = accuracy_score(train_pred_values , np.ravel(Y_train))
+        acc = accuracy_score(pred_values , np.ravel(Y_test))
+        train_acc_score.append(train_acc)
+        acc_score.append(acc)
 
-       
-
+   
     avg_acc_score = sum(acc_score)/10
- 
-    print('accuracy of each fold - {}'.format(acc_score))
-    print('Avg accuracy : {}'.format(avg_acc_score))
+
+    if print_acc:
+        print("Accuracies Multilayer Perceptron")
+        print("Train Acc: ", end='')
+        for acc in train_acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print()
+        print("Test Acc: ", end='')
+        for acc in acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print(); print()
+
+        train_avg_acc_score = sum(train_acc_score)/len(train_acc_score)
+        avg_acc_score = sum(acc_score)/(len(acc_score))
+
+    # print the average accuracies
+    if print_acc:
+        print("Multilayer Perceptron Average Accuracy")
+        print("  Avg. Training: {:.2f}%".format(train_avg_acc_score*100))
+        print("  Avg. Testing: {:.2f}%".format(avg_acc_score*100))
+        print()
+    print()
+    print()
 
 
     
@@ -101,34 +124,56 @@ def knn(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
  
     
     
-    print(" cross validation scores:")
-    crossvalid(neigh, X, Y)
+    
   
     if print_cmatrix:
-        get_cmatrix(neigh, X_test, y_test)
+        get_cmatrix(neigh, X_test, y_test, "K-Nearest Neighbors")
+
+    print("Cross Validation Scores:")
+    crossvalid(neigh, X, Y)
     
-    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    train_acc_score = []
     acc_score = []
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
     for train_index , test_index in kf.split(X):
-        try:
-            X_train , X_test = X[train_index,:],X[test_index,:]
-            Y_train , Y_test = Y[train_index] , Y[test_index]
-            neigh.fit(X_train,np.ravel(Y_train))
-            pred_values = neigh.predict(X_test)
-            acc = accuracy_score(pred_values , np.ravel(Y_test))
-            acc_score.append(acc)
-          
-        except:
-            X_train , X_test = X[train_index,:],X[test_index,:]
+        X_train , X_test = X[train_index,:],X[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+        neigh.fit(X_train,np.ravel(Y_train))
+        train_pred_values = neigh.predict(X_train)
+        pred_values = neigh.predict(X_test)
+        train_acc = accuracy_score(train_pred_values , np.ravel(Y_train))
+        acc = accuracy_score(pred_values , np.ravel(Y_test))
+        train_acc_score.append(train_acc)
+        acc_score.append(acc)
 
 
    
     avg_acc_score = sum(acc_score)/10
 
-    print('accuracy of each fold - {}'.format(acc_score))
-    print('Avg accuracy : {}'.format(avg_acc_score))
+    if print_acc:
+        print("Accuracies K-Nearest Neighbors")
+        print("Train Acc: ", end='')
+        for acc in train_acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print()
+        print("Test Acc: ", end='')
+        for acc in acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print(); print()
 
-    
+        train_avg_acc_score = sum(train_acc_score)/len(train_acc_score)
+        avg_acc_score = sum(acc_score)/(len(acc_score))
+
+    # print the average accuracies
+    if print_acc:
+        print("K-Nearest Neighbors Average Accuracy")
+        print("  Avg. Training: {:.2f}%".format(train_avg_acc_score*100))
+        print("  Avg. Testing: {:.2f}%".format(avg_acc_score*100))
+        print()
+
+    print()
+    print()
+
     
     return neigh
     
@@ -146,36 +191,55 @@ def svm(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
 
     # Creating and fitting the model
-    svm = SVC(kernel='linear', gamma= 'scale', random_state= 40, train_size = 0.1)
+    svm = SVC(kernel='linear', gamma= 'scale', random_state= 40)
     svm.fit(X_train, y_train)
+    
+    if print_cmatrix:
+        get_cmatrix(svm, X_test, y_test, "Support Vector Machine")
+
+    print("Cross Validation Scores:")
     crossvalid(svm, X, Y)
     
- 
-    if print_cmatrix:
-        get_cmatrix(svm, X_test, y_test)
-    
-    kf = KFold(n_splits=10, random_state=10, shuffle=True)
+    train_acc_score = []
     acc_score = []
+    kf = KFold(n_splits=10, random_state=10, shuffle=True)
     for train_index , test_index in kf.split(X):
-        try:
-            X_train , X_test = X[train_index,:],X[test_index,:]
-            Y_train , Y_test = Y[train_index] , Y[test_index]
-            svm.fit(X_train,np.ravel(Y_train))
-            pred_values = svm.predict(X_test)
-            acc = accuracy_score(pred_values , np.ravel(Y_test))
-            acc_score.append(acc)
+        X_train , X_test = X[train_index,:],X[test_index,:]
+        Y_train , Y_test = Y[train_index] , Y[test_index]
+        svm.fit(X_train,np.ravel(Y_train))
+        train_pred_values = svm.predict(X_train)
+        pred_values = svm.predict(X_test)
+        train_acc = accuracy_score(train_pred_values , np.ravel(Y_train))
+        acc = accuracy_score(pred_values , np.ravel(Y_test))
+        train_acc_score.append(train_acc)
+        acc_score.append(acc)
             
-        except:
-            X_train , X_test = X[train_index,:],X[test_index,:]
-       
-
-    avg_acc_score = sum(acc_score)/10
- 
-    print('accuracy of each fold - {}'.format(acc_score))
-    print('Avg accuracy : {}'.format(avg_acc_score))
     
+    if print_acc:
+        print("Accuracies Support Vector Machine")
+        print("Train Acc: ", end='')
+        for acc in train_acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print()
+        print("Test Acc: ", end='')
+        for acc in acc_score:
+            print("{:.2f}%  ".format(acc*100), end='')
+        print(); print()
+
+        train_avg_acc_score = sum(train_acc_score)/len(train_acc_score)
+        avg_acc_score = sum(acc_score)/(len(acc_score))
+
+    # print the average accuracies
+    if print_acc:
+        print("Support Vector Machine Average Accuracy")
+        print("  Avg. Training: {:.2f}%".format(train_avg_acc_score*100))
+        print("  Avg. Testing: {:.2f}%".format(avg_acc_score*100))
+        print()
+
+    print()
+    print()
  
- 
+    
     return svm
 
 
@@ -186,8 +250,8 @@ def crossvalid(clf, X, Y):
     
 
     
-def get_cmatrix(classifier, X_test, y_test):
-    title = [("Normalized confusion matrix")]
+def get_cmatrix(classifier, X_test, y_test, name):
+    title = [(name + " Normalized confusion matrix")]
     disp = ConfusionMatrixDisplay.from_estimator(
         classifier,
         X_test,
@@ -198,16 +262,25 @@ def get_cmatrix(classifier, X_test, y_test):
     )
     disp.ax_.set_title(title)
 
-    print(title)
+    print(name + " Normalized Confusion Matrix")
     # print(disp.confusion_matrix)
     print("\t\t\tPredicted")
+    print("\t   ", end='')
+    for i in range(0, len(disp.confusion_matrix)):
+        if (i == (len(disp.confusion_matrix) - 1)):
+            print("  {}   ".format(i))
+        else:
+            print("  {}   ".format(i), end='')
+
     for i, row in enumerate(disp.confusion_matrix):
         if i == int(len(row)/2):
-            print('True\t[', end='')
+            print('True\t{} ['.format(i), end='')
         else:
-            print('\t[', end='')
+            print('\t{} ['.format(i), end='')
         for col in row:
                 print("{:.3f} ".format(col), end='')
         print(']')
-
+    
+    print()
+    
     plt.show()
