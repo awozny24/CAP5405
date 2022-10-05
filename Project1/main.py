@@ -4,12 +4,12 @@ import os
 from sys import platform
 
 
-path = os.getcwd() 
+# pathMain = os.getcwd() 
 
-if platform == 'darwin':
-    slash = '/'
-else: 
-    slash = '\\'
+# if platform == 'darwin':
+#     slash = '/'
+# else: 
+#     slash = '\\'
 
 # print("\n##################################################################")
 # print("############# BEGIN REGRESSOR CLASSIFICATION RESULTS #############")
@@ -30,5 +30,5 @@ else:
 # regressors.GetRegModel("mlp", k_folds=10, print_acc=True, retrain=True, dataProp=0.1)
 # print("############## END REGRESSOR CLASSIFICATION RESULTS ################\n")
 
-classifiers.svm('single', dataProp=1.0)
-# classifiers.knn('single', dataProp=0.1)
+classifiers.svm('single', dataProp=1.0, print_cmatrix=True, print_acc=True)
+# classifiers.knn('single', dataProp=0.1, print_cmatrix=True, print_acc=True)

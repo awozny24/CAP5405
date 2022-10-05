@@ -45,11 +45,11 @@ def load(path, dataProp=1.0):
   return X, Y
 
 
-def mlp(type = None, dataProp=1.0):
+def mlp(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     if type == 'single':
         X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt', dataProp)
+        X,Y = load(path + slash + 'tictac_final.txt', dataProp)
 
 
     
@@ -60,8 +60,9 @@ def mlp(type = None, dataProp=1.0):
     print(" cross validation scores:")
     crossvalid(mlp, X, Y)
     
-   
-    get_cmatrix(mlp, X_test, y_test)
+    if print_cmatrix:
+        get_cmatrix(mlp, X_test, y_test)
+
     kf = KFold(n_splits=10, random_state=10, shuffle=True)
     acc_score = []
     for train_index , test_index in kf.split(X):
@@ -88,7 +89,7 @@ def mlp(type = None, dataProp=1.0):
     return mlp
          
 
-def knn(type = None, dataProp=1.0):
+def knn(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     if type == 'single':
         X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
@@ -103,8 +104,8 @@ def knn(type = None, dataProp=1.0):
     print(" cross validation scores:")
     crossvalid(neigh, X, Y)
   
-    
-    get_cmatrix(neigh, X_test, y_test)
+    if print_cmatrix:
+        get_cmatrix(neigh, X_test, y_test)
     
     kf = KFold(n_splits=10, random_state=10, shuffle=True)
     acc_score = []
@@ -135,7 +136,7 @@ def knn(type = None, dataProp=1.0):
     
 
 #want to change this to just svm
-def svm(type = None, dataProp=1.0):
+def svm(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     if type == 'single':
         X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
@@ -150,7 +151,8 @@ def svm(type = None, dataProp=1.0):
     crossvalid(svm, X, Y)
     
  
-    get_cmatrix(svm, X_test, y_test)
+    if print_cmatrix:
+        get_cmatrix(svm, X_test, y_test)
     
     kf = KFold(n_splits=10, random_state=10, shuffle=True)
     acc_score = []
