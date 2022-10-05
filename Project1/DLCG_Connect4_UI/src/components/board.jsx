@@ -163,14 +163,14 @@ class Board extends React.Component {
           {this.state.aiPlaying ? (
             <div className="game-over">
               <div className="pop-up">
-                <h1>AI Playing</h1>
+                <h1>Yellow Playing</h1>
               </div>
             </div>
           ) : (
             <div></div>
           )}
           <div className="status">
-            <div className="player">{this.state.player}'s Turn</div>
+            <div className="player">{this.state.player === 'x' ? "Yellow" : "Red"}'s Turn</div>
             <div className="match">{this.state.gameState}</div>
           </div>
           <Column
