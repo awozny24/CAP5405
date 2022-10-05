@@ -326,9 +326,14 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, thresh=None, eliminateUs
 
         if print_acc:
             print("Accuracies Linear Regression")
-            for train, test in zip(trainAccs, testAccs):
-                print("Train Acc: {:.2f}%\tTest Acc: {:.2f}%".format(train, test))
+            print("Train Acc: ", end='')
+            for acc in trainAccs:
+                print("{:.2f}%  ".format(acc), end='')
             print()
+            print("Test Acc: ", end='')
+            for acc in testAccs:
+                print("{:.2f}%  ".format(acc), end='')
+            print(); print()
 
         # save models if not already saved
         if (not os.path.exists(lrModelPath)) or retrain:
@@ -380,9 +385,14 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, thresh=None, eliminateUs
 
         if print_acc:
             print("K-Nearest Neighbors Regressor Accuracies")
-            for train, test in zip(trainAccs, testAccs):
-                print("Train Acc: {:.2f}%\tTest Acc: {:.2f}%".format(train, test))
+            print("Train Acc: ", end='')
+            for acc in trainAccs:
+                print("{:.2f}%  ".format(acc), end='')
             print()
+            print("Test Acc: ", end='')
+            for acc in testAccs:
+                print("{:.2f}%  ".format(acc), end='')
+            print(); print()
 
         # save models if not already saved
         if (not os.path.exists(knnRegModelPath)) or retrain:
@@ -435,9 +445,14 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, thresh=None, eliminateUs
         
         if print_acc:
             print("MultiLayer Perceptron Regressor Accuracy")
-            for train, test in zip(trainAccs, testAccs):
-                print("Train Acc: {:.2f}%\tTest Acc: {:.2f}%".format(train, test))
+            print("Train Acc: ", end='')
+            for acc in trainAccs:
+                print("{:.2f}%  ".format(acc), end='')
             print()
+            print("Test Acc: ", end='')
+            for acc in testAccs:
+                print("{:.2f}%  ".format(acc), end='')
+            print(); print()
 
         # save models if not already saved
         if (not os.path.exists(mlpRegModelPath)) or retrain:

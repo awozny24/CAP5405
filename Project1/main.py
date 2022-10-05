@@ -11,7 +11,10 @@ if platform == 'darwin':
 else: 
     slash = '\\'
 
-print("\n############# BEGIN REGRESSOR CLASSIFICATION RESULTS #############")
+print("\n##################################################################")
+print("############# BEGIN REGRESSOR CLASSIFICATION RESULTS #############")
+print("##################################################################")
+print()
 print("#################################################")
 print("############# Training on All Data ##############")
 print("#################################################")
@@ -25,6 +28,7 @@ print("#################################################")
 regressors.GetRegModel("lr", k_folds=10, print_acc=True, retrain=True, dataProp=0.1)
 regressors.GetRegModel("knn", k_folds=10, print_acc=True, retrain=True, dataProp=0.1)
 regressors.GetRegModel("mlp", k_folds=10, print_acc=True, retrain=True, dataProp=0.1)
-print("############## END REGRESSOR CLASSIFICATION RESULTS ##############\n")
+print("############## END REGRESSOR CLASSIFICATION RESULTS ################\n")
 
-# classifiers.mlp('single')
+classifiers.knn('single', dataProp=1.0)
+classifiers.knn('single', dataProp=0.1)

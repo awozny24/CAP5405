@@ -35,18 +35,21 @@ if platform == 'darwin':
 else: 
     slash = '\\'
 
-def load(path):
+def load(path, dataProp=1.0):
   text = np.loadtxt(path)
+  # randomly select portion of data
+  perm = np.random.permutation(range(0, text.shape[0]))
+  text = text[perm[0:int(dataProp*text.shape[0])], :]
   X = text[:,:9]
   Y = text[:,9:]
   return X, Y
 
 
-def mlp(type = None):
+def mlp(type = None, dataProp=1.0):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt', dataProp)
 
 
     
@@ -85,11 +88,11 @@ def mlp(type = None):
     return mlp
          
 
-def knn(type = None):
+def knn(type = None, dataProp=1.0):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt', dataProp)
     
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
     neigh = KNeighborsClassifier(n_neighbors=3)
@@ -132,11 +135,11 @@ def knn(type = None):
     
 
 #want to change this to just svm
-def svm(type = None):
+def svm(type = None, dataProp=1.0):
     if type == 'single':
-        X,Y = load(path + slash + 'tictac_single.txt')
+        X,Y = load(path + slash + 'tictac_single.txt', dataProp)
     elif type == 'final':
-         X,Y = load(path + slash + 'tictac_final.txt')
+         X,Y = load(path + slash + 'tictac_final.txt', dataProp)
        
     # Splitting training and testing samples
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
