@@ -53,7 +53,7 @@ def mlp(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
 
 
     
-    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40)
+    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, train_size = 0.1)
     mlp = MLPClassifier(activation='relu', solver ='adam', max_iter=300).fit(X_train, y_train)
    
     
@@ -95,7 +95,7 @@ def knn(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     elif type == 'final':
          X,Y = load(path + slash + 'tictac_final.txt', dataProp)
     
-    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
+    X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True, train_size = 0.1)
     neigh = KNeighborsClassifier(n_neighbors=3)
     neigh.fit(X_train, y_train)
  
@@ -114,7 +114,7 @@ def knn(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
             X_train , X_test = X[train_index,:],X[test_index,:]
             Y_train , Y_test = Y[train_index] , Y[test_index]
             neigh.fit(X_train,np.ravel(Y_train))
-            pred_values = mlp.predict(X_test)
+            pred_values = neigh.predict(X_test)
             acc = accuracy_score(pred_values , np.ravel(Y_test))
             acc_score.append(acc)
           
@@ -146,7 +146,7 @@ def svm(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
     X_train, X_test, y_train, y_test = train_test_split(X, np.ravel(Y), random_state=40, shuffle=True)
 
     # Creating and fitting the model
-    svm = SVC(kernel='linear', gamma= 'scale', random_state= 40)
+    svm = SVC(kernel='linear', gamma= 'scale', random_state= 40, train_size = 0.1)
     svm.fit(X_train, y_train)
     crossvalid(svm, X, Y)
     
@@ -161,7 +161,7 @@ def svm(type = None, dataProp=1.0, print_acc=False, print_cmatrix=False):
             X_train , X_test = X[train_index,:],X[test_index,:]
             Y_train , Y_test = Y[train_index] , Y[test_index]
             svm.fit(X_train,np.ravel(Y_train))
-            pred_values = mlp.predict(X_test)
+            pred_values = svm.predict(X_test)
             acc = accuracy_score(pred_values , np.ravel(Y_test))
             acc_score.append(acc)
             

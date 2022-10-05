@@ -328,18 +328,18 @@ if __name__ == '__main__':
         layout.gameplay_classification(classifier = mlp, file ='single')
 
         # linear regression model used for classification
-        lr = regressors.GetRegModel('lr', k_folds=10, print_acc=False, get_conf_mat=False)
+        lr = regressors.GetRegModel('lr', k_folds=10, print_acc=False)
         layout.reset_board()
         layout.gameplay_classification(classifier = lr, file ='single', randMove=True)
 
         # knn regression model used for classification
-        knnr = regressors.GetRegModel('knn', k_folds=10, print_acc=False, get_conf_mat=False)
+        knnr = regressors.GetRegModel('knn', k_folds=10, print_acc=False)
         layout.reset_board()
         layout.gameplay_classification(classifier = knnr, file ='single', randMove=True)
 
 
     # multilayer perceptron regression model used for classification
-    mlpr = regressors.GetRegModel('mlp', k_folds=10, print_acc=False, get_conf_mat=False)
+    mlpr = regressors.GetRegModel('mlp', k_folds=10, print_acc=False)
     layout.reset_board()
     layout.gameplay_classification(classifier = mlpr, file ='single', randMove=False)
 
