@@ -165,7 +165,6 @@ def svm(type = None, dataProp=1.0):
             
         except:
             X_train , X_test = X[train_index,:],X[test_index,:]
-
        
 
     avg_acc_score = sum(acc_score)/10
@@ -198,6 +197,15 @@ def get_cmatrix(classifier, X_test, y_test):
     disp.ax_.set_title(title)
 
     print(title)
-    print(disp.confusion_matrix)
-    plt.show()
+    # print(disp.confusion_matrix)
+    print("\t\t\tPredicted")
+    for i, row in enumerate(disp.confusion_matrix):
+        if i == int(len(row)/2):
+            print('True\t[', end='')
+        else:
+            print('\t[', end='')
+        for col in row:
+                print("{:.3f} ".format(col), end='')
+        print(']')
 
+    plt.show()
