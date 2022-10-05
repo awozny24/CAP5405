@@ -128,13 +128,18 @@ body {
   }
 }
 .game-over .pop-up{
-  margin-top: 300px;
+  margin-top: 100px;
   background-color: #fff;
   box-shadow: 3px 4px 9px #0003;
   width: max-content;
   height: max-content;
   padding: 50px 100px;
   border-radius: 5px;
+  transition: 0.5s;
+}
+.game-over .end-pop-up:hover{
+  opacity: 0.7;
+  transition: 0.5s;
 }
 .game-over .pop-up .play-again-btn{
   font-family: 'Poppins';

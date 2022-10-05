@@ -25,9 +25,13 @@ class Board extends React.Component {
 
   onBoardClickHandler = () => {
     if (this.state.player == "x") {
-      this.setState({ player: "o" });
+      this.setState((prev) => {
+        return { ...prev, player: "o" };
+      });
     } else {
-      this.setState({ player: "x" });
+      this.setState((prev) => {
+        return { ...prev, player: "x" };
+      });
     }
   };
 
@@ -76,53 +80,57 @@ class Board extends React.Component {
         } else {
           res = 0;
         }
-        this.setState((prevState) => {
-          let gameOverState = false;
-          let gameNewState = "";
-          if (res == 0) {
-            gameNewState = "Draw";
-          } else if (res == 1) {
-            gameNewState = "X Wins";
-            gameOverState = true;
-          } else {
-            gameNewState = "X Loses";
-            gameOverState = true;
+        this.setState(
+          (prevState) => {
+            let gameOverState = false;
+            let gameNewState = "";
+            if (res == 0) {
+              gameNewState = "Draw";
+            } else if (res == 1) {
+              gameNewState = "X Wins";
+              gameOverState = true;
+            } else {
+              gameNewState = "X Loses";
+              gameOverState = true;
+            }
+            return {
+              ...prevState,
+              gameState: gameNewState,
+              noOfMoves: this.state.noOfMoves + 1,
+              gameOver: gameOverState,
+            };
+          },
+          () => {
+            if (
+              this.props.players === 1 &&
+              this.state.player == "x" &&
+              !this.state.gameOver
+            ) {
+              this.aiPlay(arr);
+            }
           }
-          return {
-            ...prevState,
-            gameState: gameNewState,
-            noOfMoves: this.state.noOfMoves + 1,
-            gameOver: gameOverState,
-          };
-        });
+        );
       }
     );
-    return this.state.gameState;
   };
 
   playAgain = () => {
     window.location.reload();
   };
 
-  aiPlay = () => {
+  aiPlay = (arr) => {
+    console.log(this.state.gameOver);
     this.setState((prev) => {
       return { ...prev, aiPlaying: true };
     });
-    let arr = [
-      [...this.state[0]],
-      [...this.state[1]],
-      [...this.state[2]],
-      [...this.state[3]],
-      [...this.state[4]],
-      [...this.state[5]],
-      [...this.state[6]],
-    ];
     let res = this.props.getNextMove(arr);
-    this.onBoardClickHandler();
-    this.boardStateHandler(res);
-    this.setState((prev) => {
-      return { ...prev, aiPlaying: false };
-    });
+    setTimeout(() => {
+      this.onBoardClickHandler();
+      this.boardStateHandler(res);
+      this.setState((prev) => {
+        return { ...prev, aiPlaying: false };
+      });
+    }, 1000);
   };
 
   getRandomInt = (max) => {
