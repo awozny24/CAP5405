@@ -200,6 +200,7 @@ class gameLayout:
     #need to add logic that supports gameplay for final dataset
   def gameplay_classification(self, classifier = None, mark = 'X', startingMove = True, file = 'single', randMove=False):
     if startingMove:
+        self.print_board()
         if randMove:
             move = self.randMove()
         else: 
@@ -320,30 +321,27 @@ if __name__ == '__main__':
         print("playing game trained on final dataset using svm classifier")
         layout.reset_board()
         layout.gameplay_classification(classifier = svm, file ='single')
-        
+
         mlp = classifiers.mlp('single')
         print("playing game trained on final dataset using mlp classifier")
         layout.reset_board()
         layout.gameplay_classification(classifier = mlp, file ='single')
 
-
         # linear regression model used for classification
         lr = regressors.GetRegModel('lr', k_folds=10, print_acc=False, get_conf_mat=False)
         layout.reset_board()
         layout.gameplay_classification(classifier = lr, file ='single', randMove=True)
-        print("End LR")
 
         # knn regression model used for classification
         knnr = regressors.GetRegModel('knn', k_folds=10, print_acc=False, get_conf_mat=False)
         layout.reset_board()
         layout.gameplay_classification(classifier = knnr, file ='single', randMove=True)
-        print("End KNNR")
+
 
     # multilayer perceptron regression model used for classification
     mlpr = regressors.GetRegModel('mlp', k_folds=10, print_acc=False, get_conf_mat=False)
     layout.reset_board()
     layout.gameplay_classification(classifier = mlpr, file ='single', randMove=False)
-    print("End MLPR")
 
 
     

@@ -24,6 +24,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split, cross_val_score
 import os
+from sys import platform
 
 
 

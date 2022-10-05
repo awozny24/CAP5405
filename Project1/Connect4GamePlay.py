@@ -9,7 +9,7 @@ import os
 import re
 import numpy as np
 import random
-import Connect4FFNN 
+import Connect4PTNN 
 import torch
 import copy
 import pygame
