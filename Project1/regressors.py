@@ -262,14 +262,11 @@ def GetBinaryConfusionMatrix(TP, TN, FP, FN, model_name, normalize=True):
     title = [("Normalized confusion matrix")]
 
     if normalize:
-        # calculate total number of predictions
-        total = TP + TN + FP + FN
-
-        # normalize each value
-        TP = TP / total
-        TN = TN / total
-        FP = FP / total
-        FN = FN / total
+        # normalize each row
+        TP = TP / (TP + FP)
+        FP = FP / (TP + FP)
+        TN = TN / (TN + FN)
+        FN = FN / (TN + FN)
 
     conf_mat = np.asarray([[TP, FP], [FN, TN]])
 
@@ -308,6 +305,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
         or ("ultilayer" in model_type) or ("erceptron" in model_type):
         runMLPR = True
 
+    trainAccs = []
     testAccs = []
 
 
@@ -360,6 +358,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
             # print accuracies
             trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
             testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            trainAccs.append(trainAcc)
             testAccs.append(testAcc)
             if print_acc:
                 print("Accuracy Linear Regression")
@@ -372,6 +371,13 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
         # save models if not already saved
         if not os.path.exists(lrModelPath):
             dump(lrModels, lrModelPath) 
+
+        # print the average accuracies
+        if print_acc:
+            print("Linear Regression Average Accuracy")
+            print("  Avg. Training: {:.2f}%".format(sum(trainAccs)/len(trainAccs)))
+            print("  Avg. Testing: {:.2f}%".format(sum(testAccs)/len(testAccs)))
+            print()
 
         # find the model with the best testing accuracy and return
         max_acc = max(testAccs)
@@ -413,6 +419,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
             # print accuracies
             trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
             testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            trainAccs.append(trainAcc)
             testAccs.append(testAcc)
             if print_acc:
                 print("K-Nearest Neighbors Regressor Accuracy")
@@ -420,7 +427,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
                 print("  Testing: {:.2f}%".format(testAcc))
                 print()
     
-            if thresh is not None:
+            if get_conf_mat:
                 # update parameters for confusion matrix
                 TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
                 TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
@@ -433,6 +440,13 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
         # save models if not already saved
         if not os.path.exists(knnRegModelPath):
             dump(knnRegModels, knnRegModelPath) 
+
+        # print the average accuracies
+        if print_acc:
+            print("K-Nearest Neighbors Regressor Average Accuracy")
+            print("  Avg. Training: {:.2f}%".format(sum(trainAccs)/len(trainAccs)))
+            print("  Avg. Testing: {:.2f}%".format(sum(testAccs)/len(testAccs)))
+            print()
 
         # find the model with the best testing accuracy and return
         max_acc = max(testAccs)
@@ -472,7 +486,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
             predTrain = mlpReg.predict(X_train, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
             predTest = mlpReg.predict(X_test, thresh=thresh, eliminateUsedSquares=eliminateUsedSquares)
 
-            if thresh is not None:
+            if get_conf_mat:
                 # update parameters for confusion matrix
                 TP = TP + np.sum(np.logical_and(predTest == 1, y_test == 1))
                 TN = TN + np.sum(np.logical_and(predTest == 0, y_test == 0))
@@ -482,6 +496,7 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
             # print accuracies
             trainAcc = PredictionAccuracy(predTrain, y=y_train)*100
             testAcc = PredictionAccuracy(predTest, y=y_test)*100
+            trainAccs.append(trainAcc)
             testAccs.append(testAcc)
             if print_acc:
                 print("MultiLayer Perceptron Regressor Accuracy")
@@ -496,12 +511,19 @@ def GetRegModel(model_type, k_folds=5, print_acc=False, get_conf_mat=False, thre
         if not os.path.exists(mlpRegModelPath):
             dump(mlpRegModels, mlpRegModelPath) 
 
+        # print the average accuracies
+        if print_acc:
+            print("MultiLayer Perceptron Regressor Average Accuracy")
+            print("  Avg. Training: {:.2f}%".format(sum(trainAccs)/len(trainAccs)))
+            print("  Avg. Testing: {:.2f}%".format(sum(testAccs)/len(testAccs)))
+            print()
+
         # find the model with the best testing accuracy and return
         max_acc = max(testAccs)
         max_ind = testAccs.index(max_acc)
         return mlpRegModels[max_ind]
         
 if __name__ == '__main__':
-    GetRegModel("lr", print_acc=True)
-    GetRegModel("knn", print_acc=True)
-    GetRegModel("mlp", print_acc=True)
+    GetRegModel("lr", k_folds=10, print_acc=True)
+    GetRegModel("knn", k_folds=10, print_acc=True, get_conf_mat=True)
+    GetRegModel("mlp", k_folds=10, print_acc=True, get_conf_mat=True)

@@ -143,5 +143,6 @@ def GetModel():
     print(c4NN.predict(train_X[0].reshape(1, train_X.shape[1])))
 
 
-GetModel()
+if __name__ = '__main__':
+    GetModel()
 

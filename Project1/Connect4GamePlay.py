@@ -232,8 +232,6 @@ class Game():
                 winning = score[0][2]
 
                 # combine probabilites to get the best score
-                # score = winning*losing + drawing / 2
-                # score = winning * losing * drawing
                 score = winning * losing
 
                 # store history
