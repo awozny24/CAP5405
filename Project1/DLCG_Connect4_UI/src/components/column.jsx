@@ -8,14 +8,17 @@ class Column extends React.Component {
   }
 
   onClickHandler = () => {
-    if (this.state.filledblock < 6) {
+    let count = 0;
+    for (let i in this.props.blockSequence) {
+      if (this.props.blockSequence[i] == 0) count = count + 1;
+    }
+    if (count > 0) {
       this.setState({
         filledblock: this.state.filledblock + 1,
       });
 
       let res = this.props.boardStateHandler(
         this.props.columnNo,
-        this.state.filledblock
       );
       this.props.onBoardClickHandler();
     } else {

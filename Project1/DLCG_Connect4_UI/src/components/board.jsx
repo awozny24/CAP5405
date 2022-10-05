@@ -18,6 +18,8 @@ class Board extends React.Component {
       gameState: "Draw",
       noOfMoves: 0,
       gameOver: false,
+      aiPlaying: false,
+      playedfirst: false,
     };
   }
 
@@ -29,14 +31,17 @@ class Board extends React.Component {
     }
   };
 
-  boardStateHandler = (columnNo, filledblock) => {
+  boardStateHandler = (columnNo) => {
     let colState = [];
+    let played = false;
     for (let i in this.state[columnNo]) {
-      if (i == filledblock) {
+      if (this.state[columnNo][i] == 0 && !played) {
         if (this.state.player == "x") {
           colState.push(1);
+          played = true;
         } else {
           colState.push(-1);
+          played = true;
         }
       } else {
         colState.push(this.state[columnNo][i]);
@@ -67,7 +72,7 @@ class Board extends React.Component {
           [...this.state[6]],
         ];
         if (this.state.noOfMoves >= 6) {
-          res = await this.props.predictfunc(arr);
+          res = this.props.predictfunc(arr);
         } else {
           res = 0;
         }
@@ -92,26 +97,48 @@ class Board extends React.Component {
         });
       }
     );
-    console.log(this.state.noOfMoves);
     return this.state.gameState;
   };
 
-  // playAgain = () => {
-  //   this.setState((prevState) => {
-  //     return {
-  //       ...prevState,
-  //       gameOver: false,
-  //       0: [0, 0, 0, 0, 0, 0],
-  //       1: [0, 0, 0, 0, 0, 0],
-  //       2: [0, 0, 0, 0, 0, 0],
-  //       3: [0, 0, 0, 0, 0, 0],
-  //       4: [0, 0, 0, 0, 0, 0],
-  //       5: [0, 0, 0, 0, 0, 0],
-  //       6: [0, 0, 0, 0, 0, 0],
-  //     };
-  //   });
+  playAgain = () => {
+    window.location.reload();
+  };
 
-  // };
+  aiPlay = () => {
+    this.setState((prev) => {
+      return { ...prev, aiPlaying: true };
+    });
+    let arr = [
+      [...this.state[0]],
+      [...this.state[1]],
+      [...this.state[2]],
+      [...this.state[3]],
+      [...this.state[4]],
+      [...this.state[5]],
+      [...this.state[6]],
+    ];
+    let res = this.props.getNextMove(arr);
+    this.onBoardClickHandler();
+    this.boardStateHandler(res);
+    this.setState((prev) => {
+      return { ...prev, aiPlaying: false };
+    });
+  };
+
+  getRandomInt = (max) => {
+    return Math.floor(Math.random() * max);
+  };
+
+  firstPlay() {
+    this.setState((prev) => {
+      return { ...prev, aiPlaying: true, playedfirst: true };
+    });
+    this.onBoardClickHandler();
+    this.boardStateHandler(this.getRandomInt(7));
+    this.setState((prev) => {
+      return { ...prev, aiPlaying: false };
+    });
+  }
 
   render() {
     return (
@@ -122,6 +149,15 @@ class Board extends React.Component {
               result={this.state.gameState}
               playAgainfunc={this.playAgain}
             />
+          ) : (
+            <div></div>
+          )}
+          {this.state.aiPlaying ? (
+            <div className="game-over">
+              <div className="pop-up">
+                <h1>AI Playing</h1>
+              </div>
+            </div>
           ) : (
             <div></div>
           )}
